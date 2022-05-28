@@ -24,12 +24,12 @@ public class GravityChangerConfig implements ConfigData {
     @ConfigEntry.Gui.Tooltip(
             count = 2
     )
-    public boolean resetGravityOnDimensionChange = true;
+    public boolean resetGravityOnDimensionChange = false;
 
     @ConfigEntry.Gui.Tooltip(
             count = 2
     )
-    public boolean resetGravityOnRespawn = true;
+    public boolean resetGravityOnRespawn = false;
 
     @ConfigEntry.Gui.Tooltip(
             count = 2
