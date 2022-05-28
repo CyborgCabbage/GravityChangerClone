@@ -1,4 +1,5 @@
 plugins {
+	id 'maven-publish'
 	id 'fabric-loom' version '0.10-SNAPSHOT'
 }
 
@@ -7,6 +8,7 @@ targetCompatibility = JavaVersion.VERSION_17
 
 archivesBaseName = project.archives_base_name
 version = "${project.mod_version}-${project.minecraft_version}"
+group = project.maven_group
 
 repositories {
 	maven {
@@ -44,4 +46,12 @@ tasks.withType(JavaCompile).configureEach {
 
 jar {
 	from "LICENSE"
+}
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			artifact jar
+		}
+	}
 }
