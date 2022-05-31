@@ -51,7 +51,7 @@ jar {
 publishing {
 	publications {
 		mavenJava(MavenPublication) {
-			artifact jar
+			from components.java
 		}
 	}
 }
