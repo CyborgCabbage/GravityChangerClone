@@ -85,14 +85,15 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
             }
             // Keep world looking direction when changing gravity
             if(rotateCamera) {
-                //Clamp pitch
+                //Clamp pitch (-89.9 to 89.9), pitches closer to (-)90.0f cause accuracy issues
                 float pitch = this.getPitch();
                 pitch = Math.min(pitch, 89.9f);
                 pitch = Math.max(pitch, -89.9f);
-
+                //Rotate camera
                 Vec3f temp = new Vec3f(RotationUtil.vecPlayerToWorld(RotationUtil.rotToVec(this.getYaw(), pitch), prevGravityDirection));
                 temp.rotate(rotation);
                 Vec2f viewRot = RotationUtil.vecToRot(RotationUtil.vecWorldToPlayer(new Vec3d(temp), gravityDirection));
+                //Update state of rotation so that the player doesn't appear to twirl round
                 float deltaYaw = viewRot.x-this.getYaw();
                 float deltaPitch = viewRot.y-this.getPitch();
                 this.setYaw(this.getYaw()+deltaYaw);
@@ -108,8 +109,6 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
                 Vec2f newViewAngles = RotationUtil.rotWorldToPlayer(worldAngles.x, worldAngles.y, gravityDirection);
                 this.setYaw(newViewAngles.x);
                 this.setPitch(newViewAngles.y);
-                this.prevYaw = this.getYaw();
-                this.prevPitch = this.getPitch();
             }
         }
     }
