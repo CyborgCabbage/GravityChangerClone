@@ -23,7 +23,7 @@ public abstract class PlayerManagerMixin {
             )
     )
     private void inject_onPlayerConnect_sendPacket_0(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci) {
-        ((ServerPlayerEntityAccessor) player).gravitychanger$sendGravityPacket(((RotatableEntityAccessor) player).gravitychanger$getGravityDirection(), true);
+        ((ServerPlayerEntityAccessor) player).gravitychanger$sendGravityPacket(((RotatableEntityAccessor) player).gravitychanger$getGravityDirection(), true, false, false);
     }
 
     // This uses the old player instance but it should be ok as long as the gravity is not changed between new player creation and this
@@ -37,6 +37,6 @@ public abstract class PlayerManagerMixin {
             )
     )
     private void inject_respawnPlayer_sendPacket_1(ServerPlayerEntity player, boolean alive, CallbackInfoReturnable<ServerPlayerEntity> cir) {
-        ((ServerPlayerEntityAccessor) player).gravitychanger$sendGravityPacket(((RotatableEntityAccessor) player).gravitychanger$getGravityDirection(), true);
+        ((ServerPlayerEntityAccessor) player).gravitychanger$sendGravityPacket(((RotatableEntityAccessor) player).gravitychanger$getGravityDirection(), true, false, false);
     }
 }

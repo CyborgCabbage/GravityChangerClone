@@ -11,10 +11,12 @@ public class ClientInit implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(GravityChangerMod.CHANNEL_GRAVITY, (client, handler, buf, responseSender) -> {
             Direction gravityDirection = buf.readEnumConstant(Direction.class);
             boolean initialGravity = buf.readBoolean();
+            boolean rotateVelocity = buf.readBoolean();
+            boolean rotateCamera = buf.readBoolean();
             client.execute(() -> {
                 if(client.player == null) return;
 
-                ((RotatableEntityAccessor) client.player).gravitychanger$setGravityDirection(gravityDirection, initialGravity);
+                ((RotatableEntityAccessor) client.player).gravitychanger$setGravityDirection(gravityDirection, initialGravity, rotateVelocity, rotateCamera);
             });
         });
     }

@@ -39,12 +39,12 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
     }
 
     @Override
-    public void gravitychanger$setGravityDirection(Direction gravityDirection, boolean initialGravity) {
+    public void gravitychanger$setGravityDirection(Direction gravityDirection, boolean initialGravity, boolean rotateVelocity, boolean rotateCamera) {
         if(this.gravitychanger$gravityDirection == gravityDirection) return;
 
         Direction prevGravityDirection = this.gravitychanger$gravityDirection;
         this.gravitychanger$gravityDirection = gravityDirection;
-        this.gravitychanger$onGravityChanged(prevGravityDirection, initialGravity);
+        this.gravitychanger$onGravityChanged(prevGravityDirection, initialGravity, rotateVelocity, rotateCamera);
     }
 
     @Override

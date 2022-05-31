@@ -33,15 +33,15 @@ public abstract class ServerPlayerEntityMixin implements RotatableEntityAccessor
     }
 
     @Override
-    public void gravitychanger$setGravityDirection(Direction gravityDirection, boolean initialGravity) {
+    public void gravitychanger$setGravityDirection(Direction gravityDirection, boolean initialGravity, boolean rotateVelocity, boolean rotateCamera) {
         if(this.gravitychanger$gravityDirection == gravityDirection) return;
 
-        this.gravitychanger$sendGravityPacket(gravityDirection, initialGravity);
+        this.gravitychanger$sendGravityPacket(gravityDirection, initialGravity, rotateVelocity, rotateCamera);
         this.gravitychanger$setTrackedGravityDirection(gravityDirection);
 
         Direction prevGravityDirection = this.gravitychanger$gravityDirection;
         this.gravitychanger$gravityDirection = gravityDirection;
-        this.gravitychanger$onGravityChanged(prevGravityDirection, initialGravity);
+        this.gravitychanger$onGravityChanged(prevGravityDirection, initialGravity, rotateVelocity, rotateCamera);
     }
 
     @Override
@@ -50,12 +50,14 @@ public abstract class ServerPlayerEntityMixin implements RotatableEntityAccessor
     }
 
     @Override
-    public void gravitychanger$sendGravityPacket(Direction gravityDirection, boolean initialGravity) {
+    public void gravitychanger$sendGravityPacket(Direction gravityDirection, boolean initialGravity, boolean rotateVelocity, boolean rotateCamera) {
         if(this.networkHandler == null) return;
 
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeEnumConstant(gravityDirection);
         buf.writeBoolean(initialGravity);
+        buf.writeBoolean(rotateVelocity);
+        buf.writeBoolean(rotateCamera);
         this.networkHandler.sendPacket(new CustomPayloadS2CPacket(GravityChangerMod.CHANNEL_GRAVITY, buf));
     }
 
@@ -71,9 +73,9 @@ public abstract class ServerPlayerEntityMixin implements RotatableEntityAccessor
     private void inject_moveToWorld_sendPacket_1(CallbackInfoReturnable<ServerPlayerEntity> cir) {
         Direction gravityDirection = this.gravitychanger$getGravityDirection();
         if(gravityDirection != Direction.DOWN && GravityChangerMod.config.resetGravityOnDimensionChange) {
-            this.gravitychanger$setGravityDirection(Direction.DOWN, true);
+            this.gravitychanger$setGravityDirection(Direction.DOWN, true, false, false);
         } else {
-            this.gravitychanger$sendGravityPacket(gravityDirection, true);
+            this.gravitychanger$sendGravityPacket(gravityDirection, true, false, false);
         }
     }
 
@@ -89,9 +91,9 @@ public abstract class ServerPlayerEntityMixin implements RotatableEntityAccessor
     private void inject_teleport_sendPacket_0(CallbackInfo ci) {
         Direction gravityDirection = this.gravitychanger$getGravityDirection();
         if(gravityDirection != Direction.DOWN && GravityChangerMod.config.resetGravityOnDimensionChange) {
-            this.gravitychanger$setGravityDirection(Direction.DOWN, true);
+            this.gravitychanger$setGravityDirection(Direction.DOWN, true, false, false);
         } else {
-            this.gravitychanger$sendGravityPacket(gravityDirection, true);
+            this.gravitychanger$sendGravityPacket(gravityDirection, true, false, false);
         }
     }
 
@@ -101,9 +103,9 @@ public abstract class ServerPlayerEntityMixin implements RotatableEntityAccessor
     )
     private void inject_copyFrom(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo ci) {
         if(GravityChangerMod.config.resetGravityOnRespawn) {
-            ((RotatableEntityAccessor) oldPlayer).gravitychanger$setGravityDirection(Direction.DOWN, true);
+            ((RotatableEntityAccessor) oldPlayer).gravitychanger$setGravityDirection(Direction.DOWN, true, false, false);
         } else {
-            this.gravitychanger$setGravityDirection(((RotatableEntityAccessor) oldPlayer).gravitychanger$getGravityDirection(), true);
+            this.gravitychanger$setGravityDirection(((RotatableEntityAccessor) oldPlayer).gravitychanger$getGravityDirection(), true, false, false);
         }
     }
 }

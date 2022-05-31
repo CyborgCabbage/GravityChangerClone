@@ -13,7 +13,7 @@ public abstract class OtherClientPlayerEntityMixin implements RotatableEntityAcc
     }
 
     @Override
-    public void gravitychanger$setGravityDirection(Direction gravityDirection, boolean initialGravity) {
+    public void gravitychanger$setGravityDirection(Direction gravityDirection, boolean initialGravity, boolean rotateVelocity, boolean rotateCamera) {
         this.gravitychanger$setTrackedGravityDirection(gravityDirection);
     }
 }

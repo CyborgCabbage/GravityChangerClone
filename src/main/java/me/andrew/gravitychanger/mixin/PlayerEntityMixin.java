@@ -1,6 +1,5 @@
 package me.andrew.gravitychanger.mixin;
 
-import me.andrew.gravitychanger.GravityChangerMod;
 import me.andrew.gravitychanger.accessor.EntityAccessor;
 import me.andrew.gravitychanger.accessor.RotatableEntityAccessor;
 import me.andrew.gravitychanger.util.RotationUtil;
@@ -53,7 +52,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
     }
 
     @Override
-    public void gravitychanger$onGravityChanged(Direction prevGravityDirection, boolean initialGravity) {
+    public void gravitychanger$onGravityChanged(Direction prevGravityDirection, boolean initialGravity, boolean rotateVelocity, boolean rotateCamera) {
         Direction gravityDirection = this.gravitychanger$getGravityDirection();
 
         this.fallDistance = 0;
@@ -74,16 +73,43 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
             if((Object) this instanceof ServerPlayerEntity serverPlayerEntity) {
                 serverPlayerEntity.networkHandler.syncWithPlayerPosition();
             }
-
+            // Get gravity rotation quaternion
+            Quaternion rotation = RotationUtil.getRotationBetween(prevGravityDirection.getUnitVector(), gravityDirection.getUnitVector());
             // Keep world velocity when changing gravity
-            this.setVelocity(RotationUtil.vecWorldToPlayer(RotationUtil.vecPlayerToWorld(this.getVelocity(), prevGravityDirection), gravityDirection));
-
+            if(rotateVelocity) {
+                Vec3f worldSpaceVec = new Vec3f(RotationUtil.vecPlayerToWorld(this.getVelocity(), prevGravityDirection));
+                worldSpaceVec.rotate(rotation);
+                this.setVelocity(RotationUtil.vecWorldToPlayer(new Vec3d(worldSpaceVec), gravityDirection));
+            }else{
+                this.setVelocity(RotationUtil.vecWorldToPlayer(RotationUtil.vecPlayerToWorld(this.getVelocity(), prevGravityDirection), gravityDirection));
+            }
             // Keep world looking direction when changing gravity
-            if(GravityChangerMod.config.keepWorldLook) {
+            if(rotateCamera) {
+                //Clamp pitch
+                float pitch = this.getPitch();
+                pitch = Math.min(pitch, 89.9f);
+                pitch = Math.max(pitch, -89.9f);
+
+                Vec3f temp = new Vec3f(RotationUtil.vecPlayerToWorld(RotationUtil.rotToVec(this.getYaw(), pitch), prevGravityDirection));
+                temp.rotate(rotation);
+                Vec2f viewRot = RotationUtil.vecToRot(RotationUtil.vecWorldToPlayer(new Vec3d(temp), gravityDirection));
+                float deltaYaw = viewRot.x-this.getYaw();
+                float deltaPitch = viewRot.y-this.getPitch();
+                this.setYaw(this.getYaw()+deltaYaw);
+                this.setPitch(this.getPitch()+deltaPitch);
+                this.prevYaw += deltaYaw;
+                this.prevPitch += deltaPitch;
+                this.bodyYaw += deltaYaw;
+                this.prevBodyYaw += deltaYaw;
+                this.headYaw += deltaYaw;
+                this.prevHeadYaw += deltaYaw;
+            }else{
                 Vec2f worldAngles = RotationUtil.rotPlayerToWorld(this.getYaw(), this.getPitch(), prevGravityDirection);
                 Vec2f newViewAngles = RotationUtil.rotWorldToPlayer(worldAngles.x, worldAngles.y, gravityDirection);
                 this.setYaw(newViewAngles.x);
                 this.setPitch(newViewAngles.y);
+                this.prevYaw = this.getYaw();
+                this.prevPitch = this.getPitch();
             }
         }
     }
@@ -105,7 +131,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
         if(gravitychanger$GRAVITY_DIRECTION.equals(data)) {
             Direction gravityDirection = this.gravitychanger$getGravityDirection();
             if(this.gravitychanger$prevGravityDirection != gravityDirection) {
-                this.gravitychanger$onGravityChanged(this.gravitychanger$prevGravityDirection, true);
+                this.gravitychanger$onGravityChanged(this.gravitychanger$prevGravityDirection, true, false, false);
                 this.gravitychanger$prevGravityDirection = gravityDirection;
             }
         }
@@ -126,7 +152,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
     private void inject_readCustomDataFromNbt(NbtCompound nbt, CallbackInfo ci) {
         if(nbt.contains("GravityDirection", NbtElement.INT_TYPE)) {
             Direction gravityDirection = Direction.byId(nbt.getInt("GravityDirection"));
-            this.gravitychanger$setGravityDirection(gravityDirection, true);
+            this.gravitychanger$setGravityDirection(gravityDirection, true, false, false);
         }
     }
 

@@ -33,7 +33,13 @@ public abstract class GravityChangerAPI {
      * This may not immediately change the applied gravity direction for the player, see GravityChangerAPI#getAppliedGravityDirection
      */
     public static void setGravityDirection(PlayerEntity playerEntity, Direction gravityDirection) {
-        ((RotatableEntityAccessor) playerEntity).gravitychanger$setGravityDirection(gravityDirection, false);
+        ((RotatableEntityAccessor) playerEntity).gravitychanger$setGravityDirection(gravityDirection, false, false, false);
+    }
+    /**
+     * The same as above but with additional parameters for controlling the manner in which gravity switches
+     */
+    public static void setGravityDirectionAdvanced(PlayerEntity playerEntity, Direction gravityDirection, boolean rotateVelocity, boolean rotateCamera) {
+        ((RotatableEntityAccessor) playerEntity).gravitychanger$setGravityDirection(gravityDirection, false, rotateVelocity, rotateCamera);
     }
 
     /**

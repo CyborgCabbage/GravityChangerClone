@@ -151,7 +151,7 @@ public abstract class RotationUtil {
         return rotPlayerToWorld(vec2f.x, vec2f.y, gravityDirection);
     }
 
-    private static Vec3d rotToVec(float yaw, float pitch) {
+    public static Vec3d rotToVec(float yaw, float pitch) {
         double radPitch = pitch * 0.017453292;
         double radNegYaw = -yaw * 0.017453292;
         double cosNegYaw = Math.cos(radNegYaw);
@@ -161,7 +161,7 @@ public abstract class RotationUtil {
         return new Vec3d(sinNegYaw * cosPitch, -sinPitch, cosNegYaw * cosPitch);
     }
 
-    private static Vec2f vecToRot(double x, double y, double z) {
+    public static Vec2f vecToRot(double x, double y, double z) {
         double sinPitch = -y;
         double radPitch = Math.asin(sinPitch);
         double cosPitch = Math.cos(radPitch);
@@ -171,6 +171,10 @@ public abstract class RotationUtil {
         if(sinNegYaw < 0) radNegYaw = Math.PI * 2 - radNegYaw;
 
         return new Vec2f(MathHelper.wrapDegrees((float)(-radNegYaw) / 0.017453292F), (float)(radPitch) / 0.017453292F);
+    }
+
+    public static Vec2f vecToRot(Vec3d vec) {
+        return vecToRot(vec.x, vec.y, vec.z);
     }
 
     private static final Quaternion[] WORLD_ROTATION_QUATERNIONS = new Quaternion[6];
@@ -215,5 +219,12 @@ public abstract class RotationUtil {
 
     public static Quaternion getCameraRotationQuaternion(Direction gravityDirection) {
         return ENTITY_ROTATION_QUATERNIONS[gravityDirection.getId()];
+    }
+
+    public static Quaternion getRotationBetween(Vec3f start, Vec3f end){
+        Vec3f rotAxis = start.copy();
+        rotAxis.cross(end);
+        float rotAngle = (float)Math.acos(start.dot(end));
+        return new Quaternion(rotAxis, rotAngle, false);
     }
 }

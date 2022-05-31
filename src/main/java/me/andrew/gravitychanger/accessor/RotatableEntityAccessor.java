@@ -8,11 +8,11 @@ public interface RotatableEntityAccessor {
         return this.gravitychanger$getTrackedGravityDirection();
     }
 
-    default void gravitychanger$setGravityDirection(Direction gravityDirection, boolean initialGravity) {
+    default void gravitychanger$setGravityDirection(Direction gravityDirection, boolean initialGravity, boolean rotateVelocity, boolean rotateCamera) {
         this.gravitychanger$setTrackedGravityDirection(gravityDirection);
     }
 
-    void gravitychanger$onGravityChanged(Direction prevGravityDirection, boolean initialGravity);
+    void gravitychanger$onGravityChanged(Direction prevGravityDirection, boolean initialGravity, boolean rotateVelocity, boolean rotateCamera);
 
     Direction gravitychanger$getTrackedGravityDirection();
 
