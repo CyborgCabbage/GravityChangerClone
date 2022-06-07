@@ -53,7 +53,6 @@
     "client.GameRendererMixin",
     "client.InGameOverlayRendererMixin",
     "client.ItemPickupParticleMixin",
-    "client.OtherClientPlayerEntityMixin",
     "client.PlayerEntityRendererMixin"
   ],
   "injectors": {

@@ -1,22 +1,16 @@
 package me.andrew.gravitychanger.accessor;
 
-import net.minecraft.entity.data.TrackedData;
+import me.andrew.gravitychanger.api.ActiveGravityList;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 
 public interface RotatableEntityAccessor {
-    default Direction gravitychanger$getGravityDirection() {
-        return this.gravitychanger$getTrackedGravityDirection();
-    }
+    ActiveGravityList gravitychanger$getActiveGravityList();
+    Direction gravitychanger$getGravityDirection(Identifier id);
 
-    default void gravitychanger$setGravityDirection(Direction gravityDirection, boolean initialGravity, boolean rotateVelocity, boolean rotateCamera) {
-        this.gravitychanger$setTrackedGravityDirection(gravityDirection);
-    }
+    Direction gravitychanger$getGravityDirection();
+
+    void gravitychanger$setGravityDirection(Identifier id, Direction gravityDirection, boolean initialGravity, boolean rotateVelocity, boolean rotateCamera);
 
     void gravitychanger$onGravityChanged(Direction prevGravityDirection, boolean initialGravity, boolean rotateVelocity, boolean rotateCamera);
-
-    Direction gravitychanger$getTrackedGravityDirection();
-
-    void gravitychanger$setTrackedGravityDirection(Direction gravityDirection);
-
-    void gravitychanger$onTrackedData(TrackedData<?> data);
 }

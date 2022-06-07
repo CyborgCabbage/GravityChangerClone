@@ -2,23 +2,25 @@ package me.andrew.gravitychanger.mixin;
 
 import me.andrew.gravitychanger.accessor.EntityAccessor;
 import me.andrew.gravitychanger.accessor.RotatableEntityAccessor;
+import me.andrew.gravitychanger.api.ActiveGravityList;
 import me.andrew.gravitychanger.util.RotationUtil;
 import net.minecraft.entity.*;
-import net.minecraft.entity.data.DataTracker;
-import net.minecraft.entity.data.TrackedData;
-import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.*;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArgs;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
@@ -33,9 +35,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
 
     @Shadow protected abstract boolean method_30263();
 
-    private static final TrackedData<Direction> gravitychanger$GRAVITY_DIRECTION = DataTracker.registerData(PlayerEntity.class, TrackedDataHandlerRegistry.FACING);
-
-    private Direction gravitychanger$prevGravityDirection = Direction.DOWN;
+    private ActiveGravityList gravitychanger$gravityList = new ActiveGravityList();
 
     protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, World world) {
         super(entityType, world);
@@ -49,6 +49,26 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
         }
 
         return this.gravitychanger$getGravityDirection();
+    }
+
+    @Override
+    public ActiveGravityList gravitychanger$getActiveGravityList(){
+        if(gravitychanger$gravityList == null){
+            gravitychanger$gravityList = new ActiveGravityList();
+        }
+        return gravitychanger$gravityList;
+    }
+
+    @Override
+    public Direction gravitychanger$getGravityDirection(Identifier id) {
+        return gravitychanger$getActiveGravityList().get(id);
+    }
+
+    @Override
+    public Direction gravitychanger$getGravityDirection() {
+        Direction direction = gravitychanger$getActiveGravityList().getDirection();
+        if(direction == null) return Direction.DOWN;
+        return direction;
     }
 
     @Override
@@ -70,7 +90,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
             };
             this.setPosition(this.getPos().add(RotationUtil.vecPlayerToWorld(relativePosOffset, prevGravityDirection)));
 
-            if((Object) this instanceof ServerPlayerEntity serverPlayerEntity) {
+            if((PlayerEntity)(Object)this instanceof ServerPlayerEntity serverPlayerEntity) {
                 serverPlayerEntity.networkHandler.syncWithPlayerPosition();
             }
             // Get gravity rotation quaternion
@@ -113,45 +133,13 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
         }
     }
 
-    @Override
-    public Direction gravitychanger$getTrackedGravityDirection() {
-        return this.getDataTracker().get(gravitychanger$GRAVITY_DIRECTION);
-    }
-
-    @Override
-    public void gravitychanger$setTrackedGravityDirection(Direction gravityDirection) {
-        this.getDataTracker().set(gravitychanger$GRAVITY_DIRECTION, gravityDirection);
-    }
-
-    @Override
-    public void gravitychanger$onTrackedData(TrackedData<?> data) {
-        if(!this.world.isClient) return;
-
-        if(gravitychanger$GRAVITY_DIRECTION.equals(data)) {
-            Direction gravityDirection = this.gravitychanger$getGravityDirection();
-            if(this.gravitychanger$prevGravityDirection != gravityDirection) {
-                this.gravitychanger$onGravityChanged(this.gravitychanger$prevGravityDirection, true, false, false);
-                this.gravitychanger$prevGravityDirection = gravityDirection;
-            }
-        }
-    }
-
-    @Inject(
-            method = "initDataTracker",
-            at = @At("RETURN")
-    )
-    private void inject_initDataTracker(CallbackInfo ci) {
-        this.dataTracker.startTracking(gravitychanger$GRAVITY_DIRECTION, Direction.DOWN);
-    }
-
     @Inject(
             method = "readCustomDataFromNbt",
             at = @At("RETURN")
     )
     private void inject_readCustomDataFromNbt(NbtCompound nbt, CallbackInfo ci) {
-        if(nbt.contains("GravityDirection", NbtElement.INT_TYPE)) {
-            Direction gravityDirection = Direction.byId(nbt.getInt("GravityDirection"));
-            this.gravitychanger$setGravityDirection(gravityDirection, true, false, false);
+        if(nbt.contains("GravityDirection", NbtElement.LIST_TYPE)) {
+            gravitychanger$getActiveGravityList().fromNbt(nbt.getList("GravityDirection", NbtElement.COMPOUND_TYPE));
         }
     }
 
@@ -160,7 +148,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
             at = @At("RETURN")
     )
     private void inject_writeCustomDataToNbt(NbtCompound nbt, CallbackInfo ci) {
-        nbt.putInt("GravityDirection", this.gravitychanger$getGravityDirection().getId());
+        nbt.put("GravityDirection", gravitychanger$getActiveGravityList().getNbt());
     }
 
     @Redirect(
@@ -248,7 +236,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
             double d = playerMovement.x;
             double e = playerMovement.z;
 
-            while(d != 0.0D && this.world.isSpaceEmpty(this, this.getBoundingBox().offset(RotationUtil.vecPlayerToWorld(d, (double)(-this.stepHeight), 0.0D, gravityDirection)))) {
+            while(d != 0.0D && this.world.isSpaceEmpty(this, this.getBoundingBox().offset(RotationUtil.vecPlayerToWorld(d, -this.stepHeight, 0.0D, gravityDirection)))) {
                 if (d < 0.05D && d >= -0.05D) {
                     d = 0.0D;
                 } else if (d > 0.0D) {
@@ -258,7 +246,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
                 }
             }
 
-            while(e != 0.0D && this.world.isSpaceEmpty(this, this.getBoundingBox().offset(RotationUtil.vecPlayerToWorld(0.0D, (double)(-this.stepHeight), e, gravityDirection)))) {
+            while(e != 0.0D && this.world.isSpaceEmpty(this, this.getBoundingBox().offset(RotationUtil.vecPlayerToWorld(0.0D, -this.stepHeight, e, gravityDirection)))) {
                 if (e < 0.05D && e >= -0.05D) {
                     e = 0.0D;
                 } else if (e > 0.0D) {
@@ -268,7 +256,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
                 }
             }
 
-            while(d != 0.0D && e != 0.0D && this.world.isSpaceEmpty(this, this.getBoundingBox().offset(RotationUtil.vecPlayerToWorld(d, (double)(-this.stepHeight), e, gravityDirection)))) {
+            while(d != 0.0D && e != 0.0D && this.world.isSpaceEmpty(this, this.getBoundingBox().offset(RotationUtil.vecPlayerToWorld(d, -this.stepHeight, e, gravityDirection)))) {
                 if (d < 0.05D && d >= -0.05D) {
                     d = 0.0D;
                 } else if (d > 0.0D) {
@@ -387,7 +375,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
                     ordinal = 0
             )
     )
-    private void modify_addDeathParticless_addParticle_0(Args args) {
+    private void modify_spawnParticles_addParticle_0(Args args) {
         Direction gravityDirection = ((EntityAccessor) this).gravitychanger$getAppliedGravityDirection();
         if(gravityDirection == Direction.DOWN) return;
 

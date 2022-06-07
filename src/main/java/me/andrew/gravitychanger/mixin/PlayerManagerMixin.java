@@ -1,6 +1,5 @@
 package me.andrew.gravitychanger.mixin;
 
-import me.andrew.gravitychanger.accessor.RotatableEntityAccessor;
 import me.andrew.gravitychanger.accessor.ServerPlayerEntityAccessor;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.server.PlayerManager;
@@ -23,7 +22,7 @@ public abstract class PlayerManagerMixin {
             )
     )
     private void inject_onPlayerConnect_sendPacket_0(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci) {
-        ((ServerPlayerEntityAccessor) player).gravitychanger$sendGravityPacket(((RotatableEntityAccessor) player).gravitychanger$getGravityDirection(), true, false, false);
+        ((ServerPlayerEntityAccessor) player).gravitychanger$sendGravityResetPacket();
     }
 
     // This uses the old player instance but it should be ok as long as the gravity is not changed between new player creation and this
@@ -37,6 +36,6 @@ public abstract class PlayerManagerMixin {
             )
     )
     private void inject_respawnPlayer_sendPacket_1(ServerPlayerEntity player, boolean alive, CallbackInfoReturnable<ServerPlayerEntity> cir) {
-        ((ServerPlayerEntityAccessor) player).gravitychanger$sendGravityPacket(((RotatableEntityAccessor) player).gravitychanger$getGravityDirection(), true, false, false);
+        ((ServerPlayerEntityAccessor) player).gravitychanger$sendGravityResetPacket();
     }
 }

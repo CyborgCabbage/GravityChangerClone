@@ -2,14 +2,12 @@ package me.andrew.gravitychanger.mixin;
 
 import me.andrew.gravitychanger.GravityChangerMod;
 import me.andrew.gravitychanger.accessor.EntityAccessor;
-import me.andrew.gravitychanger.accessor.RotatableEntityAccessor;
 import me.andrew.gravitychanger.util.RotationUtil;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityPose;
-import net.minecraft.entity.data.TrackedData;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.particle.BlockStateParticleEffect;
@@ -74,7 +72,7 @@ public abstract class EntityMixin implements EntityAccessor {
 
     @Shadow public abstract Box getBoundingBox();
 
-    @Shadow public static Vec3d adjustMovementForCollisions(Vec3d movement, Box entityBoundingBox, List<VoxelShape> collisions) { return null; };
+    @Shadow public static Vec3d adjustMovementForCollisions(Vec3d movement, Box entityBoundingBox, List<VoxelShape> collisions) { return null; }
 
     @Shadow public abstract Vec3d getPos();
 
@@ -89,16 +87,6 @@ public abstract class EntityMixin implements EntityAccessor {
     @Override
     public Direction gravitychanger$getAppliedGravityDirection() {
         return Direction.DOWN;
-    }
-
-    @Inject(
-            method = "onTrackedDataSet",
-            at = @At("RETURN")
-    )
-    private void inject_onTrackedDataSet(TrackedData<?> data, CallbackInfo ci) {
-        if(this instanceof RotatableEntityAccessor rotatableEntityAccessor) {
-            rotatableEntityAccessor.gravitychanger$onTrackedData(data);
-        }
     }
 
     @Inject(
@@ -180,9 +168,9 @@ public abstract class EntityMixin implements EntityAccessor {
 
         Vec3d vec3d = RotationUtil.vecPlayerToWorld(0.0D, this.standingEyeHeight, 0.0D, gravityDirection);
 
-        double d = MathHelper.lerp((double)tickDelta, this.prevX, this.getX()) + vec3d.x;
-        double e = MathHelper.lerp((double)tickDelta, this.prevY, this.getY()) + vec3d.y;
-        double f = MathHelper.lerp((double)tickDelta, this.prevZ, this.getZ()) + vec3d.z;
+        double d = MathHelper.lerp(tickDelta, this.prevX, this.getX()) + vec3d.x;
+        double e = MathHelper.lerp(tickDelta, this.prevY, this.getY()) + vec3d.y;
+        double f = MathHelper.lerp(tickDelta, this.prevZ, this.getZ()) + vec3d.z;
         cir.setReturnValue(new Vec3d(d, e, f));
     }
 

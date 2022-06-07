@@ -1,10 +1,11 @@
 package me.andrew.gravitychanger.item;
 
-import me.andrew.gravitychanger.accessor.RotatableEntityAccessor;
+import me.andrew.gravitychanger.GravityChangerMod;
 import me.andrew.gravitychanger.api.GravityChangerAPI;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Direction;
@@ -21,7 +22,8 @@ public class GravityChangerItem extends Item {
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        GravityChangerAPI.setGravityDirection(user, this.gravityDirection);
+        if(!world.isClient())
+            GravityChangerAPI.setGravityDirection((ServerPlayerEntity) user, GravityChangerMod.PLAYER_GRAVITY, gravityDirection);
         return TypedActionResult.success(user.getStackInHand(hand));
     }
 }
