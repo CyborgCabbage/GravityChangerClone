@@ -14,7 +14,8 @@ public class ClientInit implements ClientModInitializer {
     public void onInitializeClient() {
         ClientPlayNetworking.registerGlobalReceiver(GravityChangerMod.CHANNEL_GRAVITY, (client, handler, buf, responseSender) -> {
             Identifier id = buf.readIdentifier();
-            Direction gravityDirection = buf.readEnumConstant(Direction.class);
+            int dir = buf.readInt();
+            Direction gravityDirection = (dir == -1) ? null : Direction.byId(dir);
             boolean initialGravity = buf.readBoolean();
             boolean rotateVelocity = buf.readBoolean();
             boolean rotateCamera = buf.readBoolean();
@@ -32,7 +33,8 @@ public class ClientInit implements ClientModInitializer {
             ArrayList<Direction> directionList = new ArrayList<>();
             for (int i = 0; i < size; i++) {
                 idList.add(buf.readIdentifier());
-                directionList.add(buf.readEnumConstant(Direction.class));
+                int dir = buf.readInt();
+                directionList.add(dir == -1 ? null : Direction.byId(dir));
             }
             client.execute(() -> {
                 if(client.player == null) return;

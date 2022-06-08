@@ -64,7 +64,8 @@ public class GravityChangerMod implements ModInitializer {
 
         ServerPlayNetworking.registerGlobalReceiver(CHANNEL_GRAVITY, (server, player, handler, buf, responseSender) -> {
             Identifier gravitySourceId = buf.readIdentifier();
-            Direction gravityDirection = buf.readEnumConstant(Direction.class);
+            int dir = buf.readInt();
+            Direction gravityDirection = (dir == -1) ? null : Direction.byId(dir);
             boolean initialGravity = buf.readBoolean();
             boolean rotateVelocity = buf.readBoolean();
             boolean rotateCamera = buf.readBoolean();
@@ -92,7 +93,7 @@ public class GravityChangerMod implements ModInitializer {
                 }else{
                     //Revert change on source client
                     PacketByteBuf buffer = PacketByteBufs.create();
-                    buffer.writeEnumConstant(gravityDirection);
+                    buffer.writeInt(gravityDirection == null ? -1 : gravityDirection.getId());
                     buffer.writeBoolean(initialGravity);
                     buffer.writeBoolean(rotateVelocity);
                     buffer.writeBoolean(rotateCamera);

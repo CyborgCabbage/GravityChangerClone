@@ -34,7 +34,7 @@ public abstract class ServerPlayerEntityMixin implements RotatableEntityAccessor
     public void gravitychanger$sendGravityPacket(Identifier id, Direction gravityDirection, boolean initialGravity, boolean rotateVelocity, boolean rotateCamera) {
         PacketByteBuf buffer = PacketByteBufs.create();
         buffer.writeIdentifier(id);
-        buffer.writeEnumConstant(gravityDirection);
+        buffer.writeInt(gravityDirection == null ? -1 : gravityDirection.getId());
         buffer.writeBoolean(initialGravity);
         buffer.writeBoolean(rotateVelocity);
         buffer.writeBoolean(rotateCamera);

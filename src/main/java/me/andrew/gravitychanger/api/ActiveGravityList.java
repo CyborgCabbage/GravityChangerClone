@@ -53,7 +53,7 @@ public class ActiveGravityList {
         for(ActiveGravityRecord agr : list){
             NbtCompound nbtCompound = new NbtCompound();
             nbtCompound.putString(ID_KEY, agr.id.toString());
-            nbtCompound.putInt(DIRECTION_KEY, agr.direction.getId());
+            nbtCompound.putInt(DIRECTION_KEY, agr.direction == null ? -1 : agr.direction.getId());
             nbtList.add(nbtCompound);
         }
         return nbtList;
@@ -65,7 +65,8 @@ public class ActiveGravityList {
             if (nbtElement instanceof NbtCompound nbtCompound) {
                 if(nbtCompound.contains(ID_KEY, NbtType.STRING) && nbtCompound.contains(DIRECTION_KEY, NbtType.INT)) {
                     Identifier id = Identifier.tryParse(nbtCompound.getString(ID_KEY));
-                    Direction direction = Direction.byId(nbtCompound.getInt(DIRECTION_KEY));
+                    int dir = nbtCompound.getInt(DIRECTION_KEY);
+                    Direction direction = (dir == -1) ? null : Direction.byId(dir);
                     set(id, direction);
                 }
             }
@@ -77,7 +78,7 @@ public class ActiveGravityList {
         buf.writeInt(list.size());
         for(ActiveGravityRecord agr : list){
             buf.writeIdentifier(agr.id);
-            buf.writeEnumConstant(agr.direction);
+            buf.writeInt(agr.direction == null ? -1 : agr.direction.getId());
         }
         return buf;
     }

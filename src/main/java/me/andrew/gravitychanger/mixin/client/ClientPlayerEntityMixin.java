@@ -46,7 +46,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
     public void gravitychanger$sendGravityPacket(Identifier id, Direction gravityDirection, PacketByteBuf verifierBuf) {
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeIdentifier(id);
-        buf.writeEnumConstant(gravityDirection);
+        buf.writeInt(gravityDirection == null ? -1 : gravityDirection.getId());
         buf.writeBoolean(false);
         buf.writeBoolean(false);
         buf.writeBoolean(false);
