@@ -102,9 +102,7 @@ public class GravityChangerMod implements ModInitializer {
                 }
             });
         });
-
         GravitySource.register(DEFAULT_GRAVITY, 0);
-
         GravitySource.register(PLAYER_GRAVITY, 1);
     }
 }
