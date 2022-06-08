@@ -5,6 +5,7 @@ import me.andrew.gravitychanger.api.GravitySource;
 import me.andrew.gravitychanger.command.GravityCommand;
 import me.andrew.gravitychanger.config.GravityChangerConfig;
 import me.andrew.gravitychanger.item.ModItems;
+import me.andrew.gravitychanger.util.RotationUtil;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
 import net.fabricmc.api.ModInitializer;

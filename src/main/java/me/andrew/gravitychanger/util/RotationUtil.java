@@ -177,54 +177,29 @@ public abstract class RotationUtil {
         return vecToRot(vec.x, vec.y, vec.z);
     }
 
-    private static final Quaternion[] WORLD_ROTATION_QUATERNIONS = new Quaternion[6];
-    static {
-        WORLD_ROTATION_QUATERNIONS[0] = Quaternion.IDENTITY.copy();
-
-        WORLD_ROTATION_QUATERNIONS[1] = Vec3f.POSITIVE_Z.getDegreesQuaternion(-180);
-
-        WORLD_ROTATION_QUATERNIONS[2] = Vec3f.POSITIVE_X.getDegreesQuaternion(-90);
-
-        WORLD_ROTATION_QUATERNIONS[3] = Vec3f.POSITIVE_X.getDegreesQuaternion(-90);
-        WORLD_ROTATION_QUATERNIONS[3].hamiltonProduct(Vec3f.POSITIVE_Y.getDegreesQuaternion(-180));
-
-        WORLD_ROTATION_QUATERNIONS[4] = Vec3f.POSITIVE_X.getDegreesQuaternion(-90);
-        WORLD_ROTATION_QUATERNIONS[4].hamiltonProduct(Vec3f.POSITIVE_Y.getDegreesQuaternion(-90));
-
-        WORLD_ROTATION_QUATERNIONS[5] = Vec3f.POSITIVE_X.getDegreesQuaternion(-90);
-        WORLD_ROTATION_QUATERNIONS[5].hamiltonProduct(Vec3f.POSITIVE_Y.getDegreesQuaternion(-270));
-    }
-
     public static Quaternion getWorldRotationQuaternion(Direction gravityDirection) {
-        return WORLD_ROTATION_QUATERNIONS[gravityDirection.getId()];
-    }
-
-    private static final Quaternion[] ENTITY_ROTATION_QUATERNIONS = new Quaternion[6];
-    static {
-        ENTITY_ROTATION_QUATERNIONS[0] = Quaternion.IDENTITY;
-
-        ENTITY_ROTATION_QUATERNIONS[1] = Vec3f.POSITIVE_Z.getDegreesQuaternion(-180);
-
-        ENTITY_ROTATION_QUATERNIONS[2] = Vec3f.POSITIVE_X.getDegreesQuaternion(90);
-
-        ENTITY_ROTATION_QUATERNIONS[3] = Vec3f.POSITIVE_X.getDegreesQuaternion(-90);
-        ENTITY_ROTATION_QUATERNIONS[3].hamiltonProduct(Vec3f.POSITIVE_Y.getDegreesQuaternion(-180));
-
-        ENTITY_ROTATION_QUATERNIONS[4] = Vec3f.POSITIVE_Y.getDegreesQuaternion(90);
-        ENTITY_ROTATION_QUATERNIONS[4].hamiltonProduct(Vec3f.POSITIVE_X.getDegreesQuaternion(90));
-
-        ENTITY_ROTATION_QUATERNIONS[5] = Vec3f.POSITIVE_X.getDegreesQuaternion(90);
-        ENTITY_ROTATION_QUATERNIONS[5].hamiltonProduct(Vec3f.POSITIVE_Z.getDegreesQuaternion(90));
+        Quaternion r = getCameraRotationQuaternion(gravityDirection);
+        QuaternionUtil.inverse(r);
+        return r;
     }
 
     public static Quaternion getCameraRotationQuaternion(Direction gravityDirection) {
-        return ENTITY_ROTATION_QUATERNIONS[gravityDirection.getId()];
+        Quaternion q1 = getRotationBetween(Direction.DOWN, gravityDirection);
+        /*if(gravityDirection.getHorizontal() != -1)
+            q1.hamiltonProduct(new Quaternion(Vec3f.NEGATIVE_Y, gravityDirection.getHorizontal()*90+180, true));*/
+        return q1;
+    }
+
+    public static Quaternion getRotationBetween(Direction start, Direction end){
+        return getRotationBetween(start.getUnitVector(), end.getUnitVector());
     }
 
     public static Quaternion getRotationBetween(Vec3f start, Vec3f end){
         Vec3f rotAxis = start.copy();
         rotAxis.cross(end);
         float rotAngle = (float)Math.acos(start.dot(end));
+        //Make sure axis isn't {0, 0, 0}
+        if(MathHelper.magnitude(rotAxis.getX(), rotAxis.getY(), rotAxis.getZ()) < 0.1 ) rotAxis = Vec3f.NEGATIVE_Z;
         return new Quaternion(rotAxis, rotAngle, false);
     }
 }
