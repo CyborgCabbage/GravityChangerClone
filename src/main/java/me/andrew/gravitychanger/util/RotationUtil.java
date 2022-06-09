@@ -37,16 +37,13 @@ public abstract class RotationUtil {
 
     public static Vec3d vecWorldToPlayer(double x, double y, double z, Direction gravityDirection) {
         return switch(gravityDirection) {
-            case DOWN  -> new Vec3d( x, y, z);
-            case UP    -> new Vec3d(-x,-y, z);
-            case NORTH -> new Vec3d( x, z,-y);
-            case SOUTH -> new Vec3d( x,-z, y);
-            case WEST  -> new Vec3d(-y, x, z);
-            case EAST  -> new Vec3d( y,-x, z);
+            case DOWN  -> new Vec3d( x,  y,  z);
+            case UP    -> new Vec3d(-x, -y,  z);
+            case NORTH -> new Vec3d( x,  z, -y);
+            case SOUTH -> new Vec3d(-x, -z, -y);
+            case WEST  -> new Vec3d(-z,  x, -y);
+            case EAST  -> new Vec3d( z, -x, -y);
         };
-        /*Vec3f v = new Vec3f((float)x,(float)y,(float)z);
-        v.rotate(getWorldRotationQuaternion(gravityDirection));
-        return new Vec3d(v);*/
     }
 
     public static Vec3d vecWorldToPlayer(Vec3d vec3d, Direction gravityDirection) {
@@ -55,16 +52,13 @@ public abstract class RotationUtil {
 
     public static Vec3d vecPlayerToWorld(double x, double y, double z, Direction gravityDirection) {
         return switch(gravityDirection) {
-            case DOWN  -> new Vec3d( x, y, z);
-            case UP    -> new Vec3d(-x,-y, z);
-            case NORTH -> new Vec3d( x,-z, y);
-            case SOUTH -> new Vec3d( x, z,-y);
-            case WEST  -> new Vec3d( y,-x, z);
-            case EAST  -> new Vec3d(-y, x, z);
+            case DOWN  -> new Vec3d( x,  y,  z);
+            case UP    -> new Vec3d(-x, -y,  z);
+            case NORTH -> new Vec3d( x, -z,  y);
+            case SOUTH -> new Vec3d(-x, -z, -y);
+            case WEST  -> new Vec3d( y, -z, -x);
+            case EAST  -> new Vec3d(-y, -z,  x);
         };
-        /*Vec3f v = new Vec3f((float)x,(float)y,(float)z);
-        v.rotate(getCameraRotationQuaternion(gravityDirection));
-        return new Vec3d(v);*/
     }
 
     public static Vec3d vecPlayerToWorld(Vec3d vec3d, Direction gravityDirection) {
@@ -73,16 +67,13 @@ public abstract class RotationUtil {
 
     public static Vec3f vecWorldToPlayer(float x, float y, float z, Direction gravityDirection) {
         return switch(gravityDirection) {
-            case DOWN  -> new Vec3f( x, y, z);
-            case UP    -> new Vec3f(-x,-y, z);
-            case NORTH -> new Vec3f( x, z,-y);
-            case SOUTH -> new Vec3f( x,-z, y);
-            case WEST  -> new Vec3f(-y, x, z);
-            case EAST  -> new Vec3f( y,-x, z);
+            case DOWN  -> new Vec3f( x,  y,  z);
+            case UP    -> new Vec3f(-x, -y,  z);
+            case NORTH -> new Vec3f( x,  z, -y);
+            case SOUTH -> new Vec3f(-x, -z, -y);
+            case WEST  -> new Vec3f(-z,  x, -y);
+            case EAST  -> new Vec3f( z, -x, -y);
         };
-        /*Vec3f v = new Vec3f(x,y,z);
-        v.rotate(getWorldRotationQuaternion(gravityDirection));
-        return v;*/
     }
 
     public static Vec3f vecWorldToPlayer(Vec3f vec3f, Direction gravityDirection) {
@@ -91,16 +82,13 @@ public abstract class RotationUtil {
 
     public static Vec3f vecPlayerToWorld(float x, float y, float z, Direction gravityDirection) {
         return switch(gravityDirection) {
-            case DOWN  -> new Vec3f( x, y, z);
-            case UP    -> new Vec3f(-x,-y, z);
-            case NORTH -> new Vec3f( x,-z, y);
-            case SOUTH -> new Vec3f( x, z,-y);
-            case WEST  -> new Vec3f( y,-x, z);
-            case EAST  -> new Vec3f(-y, x, z);
+            case DOWN  -> new Vec3f( x,  y,  z);
+            case UP    -> new Vec3f(-x, -y,  z);
+            case NORTH -> new Vec3f( x, -z,  y);
+            case SOUTH -> new Vec3f(-x, -z, -y);
+            case WEST  -> new Vec3f( y, -z, -x);
+            case EAST  -> new Vec3f(-y, -z,  x);
         };
-        /*Vec3f v = new Vec3f(x,y,z);
-        v.rotate(getCameraRotationQuaternion(gravityDirection));
-        return v;*/
     }
 
     public static Vec3f vecPlayerToWorld(Vec3f vec3f, Direction gravityDirection) {
@@ -109,9 +97,9 @@ public abstract class RotationUtil {
 
     public static Vec3d maskWorldToPlayer(double x, double y, double z, Direction gravityDirection) {
         return switch(gravityDirection) {
-            case DOWN, UP     -> new Vec3d(x, y, z);
+            case DOWN , UP    -> new Vec3d(x, y, z);
             case NORTH, SOUTH -> new Vec3d(x, z, y);
-            case WEST, EAST   -> new Vec3d(y, x, z);
+            case WEST , EAST  -> new Vec3d(z, x, y);
         };
     }
 
@@ -121,9 +109,9 @@ public abstract class RotationUtil {
 
     public static Vec3d maskPlayerToWorld(double x, double y, double z, Direction gravityDirection) {
         return switch(gravityDirection) {
-            case DOWN, UP     -> new Vec3d(x, y, z);
+            case DOWN , UP    -> new Vec3d(x, y, z);
             case NORTH, SOUTH -> new Vec3d(x, z, y);
-            case WEST, EAST   -> new Vec3d(y, x, z);
+            case WEST , EAST  -> new Vec3d(y, z, x);
         };
     }
 
@@ -190,13 +178,27 @@ public abstract class RotationUtil {
     }
 
     public static Quaternion getWorldRotationQuaternion(Direction gravityDirection) {
-        Quaternion r = getCameraRotationQuaternion(gravityDirection);
-        QuaternionUtil.inverse(r);
-        return r;
+        Quaternion q = getRotationBetween(Direction.DOWN, gravityDirection);
+        if(gravityDirection.getHorizontal() != -1)
+            q.hamiltonProduct(new Quaternion(Vec3f.NEGATIVE_Y, gravityDirection.getHorizontal()*90+180, true));
+        QuaternionUtil.inverse(q);
+        if(gravityDirection == Direction.WEST
+                || gravityDirection == Direction.SOUTH
+                || gravityDirection == Direction.NORTH
+                || gravityDirection == Direction.UP)
+            q.hamiltonProduct(new Quaternion(0,0,0,-1));
+        return q;
     }
 
     public static Quaternion getCameraRotationQuaternion(Direction gravityDirection) {
-        return getRotationBetween(Direction.DOWN, gravityDirection);
+        Quaternion q1 = getRotationBetween(Direction.DOWN, gravityDirection);
+        if(gravityDirection.getHorizontal() != -1)
+            q1.hamiltonProduct(new Quaternion(Vec3f.NEGATIVE_Y, gravityDirection.getHorizontal()*90+180, true));
+        if(gravityDirection == Direction.WEST
+                || gravityDirection == Direction.EAST
+                || gravityDirection == Direction.NORTH)
+            q1.hamiltonProduct(new Quaternion(0,0,0,-1));
+        return q1;
     }
 
     public static Quaternion getRotationBetween(Direction start, Direction end){
