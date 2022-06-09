@@ -31,7 +31,7 @@ public abstract class EntityRenderMixin {
             return entityRenderDispatcher.getRotation();
         }
 
-        Quaternion quaternion = RotationUtil.getCameraRotationQuaternion(gravityDirection).copy();
+        Quaternion quaternion = RotationUtil.getCameraRotationQuaternion(gravityDirection).toFloat().copy();
         QuaternionUtil.inverse(quaternion);
         quaternion.hamiltonProduct(entityRenderDispatcher.getRotation().copy());
         return quaternion;

@@ -44,7 +44,7 @@ public abstract class EntityRenderDispatcherMixin {
         if(!this.renderShadows) return;
 
         matrices.push();
-        matrices.multiply(RotationUtil.getCameraRotationQuaternion(gravityDirection));
+        matrices.multiply(RotationUtil.getCameraRotationQuaternion(gravityDirection).toFloat());
     }
 
     @Inject(
@@ -77,7 +77,7 @@ public abstract class EntityRenderDispatcherMixin {
         if(gravityDirection == Direction.DOWN) return;
         if(!this.renderShadows) return;
 
-        matrices.multiply(RotationUtil.getCameraRotationQuaternion(gravityDirection));
+        matrices.multiply(RotationUtil.getCameraRotationQuaternion(gravityDirection).toFloat());
     }
 
     @Inject(

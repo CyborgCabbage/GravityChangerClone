@@ -64,7 +64,7 @@ public abstract class CameraMixin {
         Direction gravityDirection = ((EntityAccessor) this.focusedEntity).gravitychanger$getAppliedGravityDirection();
         if(gravityDirection == Direction.DOWN) return;
 
-        Quaternion rotation = RotationUtil.getCameraRotationQuaternion(gravityDirection).copy();
+        Quaternion rotation = RotationUtil.getCameraRotationQuaternion(gravityDirection).toFloat().copy();
         rotation.hamiltonProduct(this.rotation);
         this.rotation.set(rotation.getX(), rotation.getY(), rotation.getZ(), rotation.getW());
     }

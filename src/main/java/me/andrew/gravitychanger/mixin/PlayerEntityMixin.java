@@ -3,6 +3,7 @@ package me.andrew.gravitychanger.mixin;
 import me.andrew.gravitychanger.accessor.EntityAccessor;
 import me.andrew.gravitychanger.accessor.RotatableEntityAccessor;
 import me.andrew.gravitychanger.api.ActiveGravityList;
+import me.andrew.gravitychanger.util.QuaternionDouble;
 import me.andrew.gravitychanger.util.RotationUtil;
 import net.minecraft.entity.*;
 import net.minecraft.entity.player.PlayerAbilities;
@@ -104,12 +105,11 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
                 serverPlayerEntity.networkHandler.syncWithPlayerPosition();
             }
             // Get gravity rotation quaternion
-            Quaternion rotation = RotationUtil.getRotationBetween(prevGravityDirection.getUnitVector(), gravityDirection.getUnitVector());
+            QuaternionDouble rotation = RotationUtil.getRotationBetween(prevGravityDirection, gravityDirection);
             // Keep world velocity when changing gravity
             if(rotateVelocity) {
-                Vec3f worldSpaceVec = new Vec3f(RotationUtil.vecPlayerToWorld(this.getVelocity(), prevGravityDirection));
-                worldSpaceVec.rotate(rotation);
-                this.setVelocity(RotationUtil.vecWorldToPlayer(new Vec3d(worldSpaceVec), gravityDirection));
+                Vec3d worldSpaceVec = RotationUtil.vecPlayerToWorld(this.getVelocity(), prevGravityDirection);
+                this.setVelocity(RotationUtil.vecWorldToPlayer(rotation.rotate(worldSpaceVec), gravityDirection));
             }else{
                 this.setVelocity(RotationUtil.vecWorldToPlayer(RotationUtil.vecPlayerToWorld(this.getVelocity(), prevGravityDirection), gravityDirection));
             }
@@ -120,9 +120,8 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
                 pitch = Math.min(pitch, 89.9f);
                 pitch = Math.max(pitch, -89.9f);
                 //Rotate camera
-                Vec3f temp = new Vec3f(RotationUtil.vecPlayerToWorld(RotationUtil.rotToVec(this.getYaw(), pitch), prevGravityDirection));
-                temp.rotate(rotation);
-                Vec2f viewRot = RotationUtil.vecToRot(RotationUtil.vecWorldToPlayer(new Vec3d(temp), gravityDirection));
+                Vec3d temp = RotationUtil.vecPlayerToWorld(RotationUtil.rotToVec(this.getYaw(), pitch), prevGravityDirection);
+                Vec2f viewRot = RotationUtil.vecToRot(RotationUtil.vecWorldToPlayer(rotation.rotate(temp), gravityDirection));
                 //Update state of rotation so that the player doesn't appear to twirl round
                 float deltaYaw = viewRot.x-this.getYaw();
                 float deltaPitch = viewRot.y-this.getPitch();

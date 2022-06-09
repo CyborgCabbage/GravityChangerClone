@@ -14,6 +14,7 @@ import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -98,5 +99,13 @@ public class GravityChangerMod implements ModInitializer {
         });
         GravitySource.register(DEFAULT_GRAVITY, 0);
         GravitySource.register(PLAYER_GRAVITY, 1);
+        for (Direction d : Direction.values()) {
+            LOGGER.info(d);
+            LOGGER.info(RotationUtil.oldVecWorldToPlayer(1,2,3, d));
+            Vec3d v = RotationUtil.newVecWorldToPlayer(1,2,3, d);
+            LOGGER.info(new Vec3d(Math.round(v.x),Math.round(v.y),Math.round(v.z)));
+        }
+
+        System.exit(0);
     }
 }

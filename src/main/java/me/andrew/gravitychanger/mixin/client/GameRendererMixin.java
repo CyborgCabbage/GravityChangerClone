@@ -30,6 +30,6 @@ public abstract class GameRendererMixin {
         Direction gravityDirection = ((EntityAccessor) this.camera.getFocusedEntity()).gravitychanger$getAppliedGravityDirection();
         if(gravityDirection == Direction.DOWN) return;
 
-        matrix.multiply(RotationUtil.getWorldRotationQuaternion(gravityDirection));
+        matrix.multiply(RotationUtil.getWorldRotationQuaternion(gravityDirection).toFloat());
     }
 }
