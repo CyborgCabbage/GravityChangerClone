@@ -98,27 +98,5 @@ public class GravityChangerMod implements ModInitializer {
         });
         GravitySource.register(DEFAULT_GRAVITY, 0);
         GravitySource.register(PLAYER_GRAVITY, 1);
-        /*LOGGER.info(RotationUtil.vecPlayerToWorld(Direction.EAST.getUnitVector(), Direction.WEST));
-        LOGGER.info(RotationUtil.vecPlayerToWorld(Direction.WEST.getUnitVector(), Direction.EAST));
-        LOGGER.info(RotationUtil.vecPlayerToWorld(Direction.NORTH.getUnitVector(), Direction.SOUTH));
-        LOGGER.info(RotationUtil.vecPlayerToWorld(Direction.SOUTH.getUnitVector(), Direction.NORTH));
-        LOGGER.info(RotationUtil.vecPlayerToWorld(Direction.UP.getUnitVector(), Direction.DOWN));
-        LOGGER.info(RotationUtil.vecPlayerToWorld(Direction.DOWN.getUnitVector(), Direction.UP));
-        LOGGER.info(" ");
-        LOGGER.info(RotationUtil.vecWorldToPlayer(Direction.EAST.getUnitVector(), Direction.WEST));
-        LOGGER.info(RotationUtil.vecWorldToPlayer(Direction.WEST.getUnitVector(), Direction.EAST));
-        LOGGER.info(RotationUtil.vecWorldToPlayer(Direction.NORTH.getUnitVector(), Direction.SOUTH));
-        LOGGER.info(RotationUtil.vecWorldToPlayer(Direction.SOUTH.getUnitVector(), Direction.NORTH));
-        LOGGER.info(RotationUtil.vecWorldToPlayer(Direction.UP.getUnitVector(), Direction.DOWN));
-        LOGGER.info(RotationUtil.vecWorldToPlayer(Direction.DOWN.getUnitVector(), Direction.UP));
-        System.exit(0);*/
-        /*for (int i = 0; i < 6; i++) {
-            var a = RotationUtil.DIR_WORLD_TO_PLAYER[i];
-            for (int j = 0; j < 6; j++) {
-                System.out.printf("%-10s", a[j]);
-            }
-            System.out.println();
-        }
-        System.exit(0);*/
     }
 }

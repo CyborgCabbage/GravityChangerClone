@@ -90,22 +90,14 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
 
         if(!initialGravity) {
             // Adjust position to avoid suffocation in blocks when changing gravity
-            /*EntityDimensions dimensions = this.getDimensions(this.getPose());
+            EntityDimensions dimensions = this.getDimensions(this.getPose());
             Direction relativeDirection = RotationUtil.dirWorldToPlayer(gravityDirection, prevGravityDirection);
             Vec3d relativePosOffset = switch(relativeDirection) {
                 case DOWN -> Vec3d.ZERO;
                 case UP -> new Vec3d(0.0D, dimensions.height - 1.0E-6D, 0.0D);
                 default -> Vec3d.of(relativeDirection.getVector()).multiply(dimensions.width / 2 - (gravityDirection.getDirection() == Direction.AxisDirection.POSITIVE ? 1.0E-6D : 0.0D)).add(0.0D, dimensions.width / 2 - (prevGravityDirection.getDirection() == Direction.AxisDirection.POSITIVE ? 1.0E-6D : 0.0D), 0.0D);
             };
-            this.setPosition(this.getPos().add(RotationUtil.vecPlayerToWorld(relativePosOffset, prevGravityDirection)));*/
-            EntityDimensions dimensions = this.getDimensions(this.getPose());
-            Vec3d newVec = new Vec3d(gravityDirection.getUnitVector());
-            Vec3d oldVec = new Vec3d(prevGravityDirection.getUnitVector());
-            if(gravityDirection.getOpposite() == prevGravityDirection){//If they are opposite
-                setPosition(getPos().add(newVec.multiply(dimensions.height - 1.0E-6D)));
-            }else if(gravityDirection != prevGravityDirection){//If they are perpendicular
-                setPosition(getPos().subtract(oldVec.multiply(dimensions.width / 2.0)).add(newVec.multiply(dimensions.width / 2.0)));
-            }
+            this.setPosition(this.getPos().add(RotationUtil.vecPlayerToWorld(relativePosOffset, prevGravityDirection)));
 
 
             if((PlayerEntity)(Object)this instanceof ServerPlayerEntity serverPlayerEntity) {

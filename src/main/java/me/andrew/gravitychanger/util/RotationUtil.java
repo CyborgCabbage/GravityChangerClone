@@ -3,7 +3,7 @@ package me.andrew.gravitychanger.util;
 import net.minecraft.util.math.*;
 
 public abstract class RotationUtil {
-    public static final Direction[][] DIR_WORLD_TO_PLAYER = new Direction[6][];
+    private static final Direction[][] DIR_WORLD_TO_PLAYER = new Direction[6][];
     static {
         for(Direction gravityDirection : Direction.values()) {
             DIR_WORLD_TO_PLAYER[gravityDirection.getId()] = new Direction[6];
