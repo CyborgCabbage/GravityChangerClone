@@ -94,7 +94,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
                 serverPlayerEntity.networkHandler.syncWithPlayerPosition();
             }
             // Get gravity rotation quaternion
-            Quaternion rotation = RotationUtil.getRotationBetween(prevGravityDirection.getUnitVector(), gravityDirection.getUnitVector());
+            Quaternion rotation = RotationUtil.getRotationBetween(prevGravityDirection, gravityDirection);
             // Keep world velocity when changing gravity
             if(rotateVelocity) {
                 Vec3f worldSpaceVec = new Vec3f(RotationUtil.vecPlayerToWorld(this.getVelocity(), prevGravityDirection));

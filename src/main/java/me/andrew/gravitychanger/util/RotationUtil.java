@@ -184,22 +184,27 @@ public abstract class RotationUtil {
     }
 
     public static Quaternion getCameraRotationQuaternion(Direction gravityDirection) {
-        Quaternion q1 = getRotationBetween(Direction.DOWN, gravityDirection);
-        /*if(gravityDirection.getHorizontal() != -1)
-            q1.hamiltonProduct(new Quaternion(Vec3f.NEGATIVE_Y, gravityDirection.getHorizontal()*90+180, true));*/
+        Quaternion q1 = getRotationBetween(Direction.DOWN, gravityDirection, true);
+        if(gravityDirection.getHorizontal() != -1)
+            q1.hamiltonProduct(new Quaternion(Vec3f.NEGATIVE_Y, gravityDirection.getHorizontal()*90+180, true));
         return q1;
     }
 
     public static Quaternion getRotationBetween(Direction start, Direction end){
-        return getRotationBetween(start.getUnitVector(), end.getUnitVector());
+        return getRotationBetween(start.getUnitVector(), end.getUnitVector(), false);
     }
-
-    public static Quaternion getRotationBetween(Vec3f start, Vec3f end){
+    public static Quaternion getRotationBetween(Direction start, Direction end, boolean axisCheck){
+        return getRotationBetween(start.getUnitVector(), end.getUnitVector(), axisCheck);
+    }
+    public static Quaternion getRotationBetween(Vec3f start, Vec3f end) {
+        return getRotationBetween( start,  end, false);
+    }
+    public static Quaternion getRotationBetween(Vec3f start, Vec3f end, boolean axisCheck){
         Vec3f rotAxis = start.copy();
         rotAxis.cross(end);
         float rotAngle = (float)Math.acos(start.dot(end));
         //Make sure axis isn't {0, 0, 0}
-        if(MathHelper.magnitude(rotAxis.getX(), rotAxis.getY(), rotAxis.getZ()) < 0.1 ) rotAxis = Vec3f.NEGATIVE_Z;
+        if(axisCheck && MathHelper.magnitude(rotAxis.getX(), rotAxis.getY(), rotAxis.getZ()) < 0.1 ) rotAxis = Vec3f.NEGATIVE_Z;
         return new Quaternion(rotAxis, rotAngle, false);
     }
 }
