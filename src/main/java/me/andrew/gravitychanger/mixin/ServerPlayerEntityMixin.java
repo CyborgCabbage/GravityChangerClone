@@ -19,18 +19,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerEntityMixin implements RotatableEntityAccessor, ServerPlayerEntityAccessor {
     @Override
-    public void gravitychanger$setGravityDirection(Identifier id, Direction gravityDirection, boolean initialGravity, boolean rotateVelocity, boolean rotateCamera) {
-        Direction prevGravityDirection = gravitychanger$getGravityDirection();
-        //Update gravity list state
-        gravitychanger$getActiveGravityList().set(id, gravityDirection);//Server
-        gravitychanger$sendGravityPacket(id, gravityDirection, initialGravity, rotateVelocity, rotateCamera);//Client
-        //Change gravity
-        if(prevGravityDirection != gravitychanger$getGravityDirection()) {
-            gravitychanger$onGravityChanged(prevGravityDirection, initialGravity, rotateVelocity, rotateCamera);
-        }
-    }
-
-    @Override
     public void gravitychanger$sendGravityPacket(Identifier id, Direction gravityDirection, boolean initialGravity, boolean rotateVelocity, boolean rotateCamera) {
         PacketByteBuf buffer = PacketByteBufs.create();
         buffer.writeIdentifier(id);

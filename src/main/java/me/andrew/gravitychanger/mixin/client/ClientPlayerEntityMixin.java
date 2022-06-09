@@ -5,7 +5,6 @@ import me.andrew.gravitychanger.GravityChangerMod;
 import me.andrew.gravitychanger.accessor.ClientPlayerEntityAccessor;
 import me.andrew.gravitychanger.accessor.EntityAccessor;
 import me.andrew.gravitychanger.accessor.RotatableEntityAccessor;
-import me.andrew.gravitychanger.api.ActiveGravityList;
 import me.andrew.gravitychanger.util.RotationUtil;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
@@ -31,15 +30,6 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 
     public ClientPlayerEntityMixin(ClientWorld world, GameProfile profile) {
         super(world, profile);
-    }
-
-    @Override
-    public void gravitychanger$setGravityDirection(Identifier id, Direction gravityDirection, boolean initialGravity, boolean rotateVelocity, boolean rotateCamera) {
-        Direction prevGravityDirection = gravitychanger$getGravityDirection();
-        gravitychanger$getActiveGravityList().set(id, gravityDirection);
-        if(prevGravityDirection != gravitychanger$getGravityDirection()) {
-            gravitychanger$onGravityChanged(prevGravityDirection, initialGravity, rotateVelocity, rotateCamera);
-        }
     }
 
     @Override

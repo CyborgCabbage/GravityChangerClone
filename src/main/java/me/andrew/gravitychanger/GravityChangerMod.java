@@ -1,6 +1,7 @@
 package me.andrew.gravitychanger;
 
 import me.andrew.gravitychanger.accessor.RotatableEntityAccessor;
+import me.andrew.gravitychanger.accessor.ServerPlayerEntityAccessor;
 import me.andrew.gravitychanger.api.GravitySource;
 import me.andrew.gravitychanger.command.GravityCommand;
 import me.andrew.gravitychanger.config.GravityChangerConfig;
@@ -10,9 +11,7 @@ import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 import org.apache.logging.log4j.LogManager;
@@ -44,7 +43,7 @@ public class GravityChangerMod implements ModInitializer {
      * ] * size
      * */
     public static final Identifier CHANNEL_GRAVITY_RESET = new Identifier(MOD_ID, "gravity_reset");
-    /* Server -> Client:
+    /* SERVER -> CLIENT:
      * Direction gravityDirection
      * */
     public static final Identifier CHANNEL_GRAVITY_OTHER_PLAYERS = new Identifier(MOD_ID, "gravity_other_players");
@@ -93,16 +92,33 @@ public class GravityChangerMod implements ModInitializer {
                     //TODO: update other clients of gravity change
                 }else{
                     //Revert change on source client
-                    PacketByteBuf buffer = PacketByteBufs.create();
-                    buffer.writeInt(gravityDirection == null ? -1 : gravityDirection.getId());
-                    buffer.writeBoolean(initialGravity);
-                    buffer.writeBoolean(rotateVelocity);
-                    buffer.writeBoolean(rotateCamera);
-                    ServerPlayNetworking.send(player, CHANNEL_GRAVITY, buffer);
+                    ((ServerPlayerEntityAccessor) player).gravitychanger$sendGravityPacket(gravitySourceId, gravityDirection, initialGravity, rotateVelocity, rotateCamera);
                 }
             });
         });
         GravitySource.register(DEFAULT_GRAVITY, 0);
         GravitySource.register(PLAYER_GRAVITY, 1);
+        /*LOGGER.info(RotationUtil.vecPlayerToWorld(Direction.EAST.getUnitVector(), Direction.WEST));
+        LOGGER.info(RotationUtil.vecPlayerToWorld(Direction.WEST.getUnitVector(), Direction.EAST));
+        LOGGER.info(RotationUtil.vecPlayerToWorld(Direction.NORTH.getUnitVector(), Direction.SOUTH));
+        LOGGER.info(RotationUtil.vecPlayerToWorld(Direction.SOUTH.getUnitVector(), Direction.NORTH));
+        LOGGER.info(RotationUtil.vecPlayerToWorld(Direction.UP.getUnitVector(), Direction.DOWN));
+        LOGGER.info(RotationUtil.vecPlayerToWorld(Direction.DOWN.getUnitVector(), Direction.UP));
+        LOGGER.info(" ");
+        LOGGER.info(RotationUtil.vecWorldToPlayer(Direction.EAST.getUnitVector(), Direction.WEST));
+        LOGGER.info(RotationUtil.vecWorldToPlayer(Direction.WEST.getUnitVector(), Direction.EAST));
+        LOGGER.info(RotationUtil.vecWorldToPlayer(Direction.NORTH.getUnitVector(), Direction.SOUTH));
+        LOGGER.info(RotationUtil.vecWorldToPlayer(Direction.SOUTH.getUnitVector(), Direction.NORTH));
+        LOGGER.info(RotationUtil.vecWorldToPlayer(Direction.UP.getUnitVector(), Direction.DOWN));
+        LOGGER.info(RotationUtil.vecWorldToPlayer(Direction.DOWN.getUnitVector(), Direction.UP));
+        System.exit(0);*/
+        /*for (int i = 0; i < 6; i++) {
+            var a = RotationUtil.DIR_WORLD_TO_PLAYER[i];
+            for (int j = 0; j < 6; j++) {
+                System.out.printf("%-10s", a[j]);
+            }
+            System.out.println();
+        }
+        System.exit(0);*/
     }
 }

@@ -4,6 +4,7 @@ import me.andrew.gravitychanger.GravityChangerMod;
 import me.andrew.gravitychanger.accessor.ClientPlayerEntityAccessor;
 import me.andrew.gravitychanger.accessor.EntityAccessor;
 import me.andrew.gravitychanger.accessor.RotatableEntityAccessor;
+import me.andrew.gravitychanger.accessor.ServerPlayerEntityAccessor;
 import me.andrew.gravitychanger.util.RotationUtil;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -53,7 +54,10 @@ public abstract class GravityChangerAPI {
      * The same as above but with additional parameters for controlling the manner in which gravity switches
      */
     public static void setGravityDirectionAdvanced(ServerPlayerEntity playerEntity, Identifier id, Direction gravityDirection, boolean rotateVelocity, boolean rotateCamera) {
+        //Server
         ((RotatableEntityAccessor) playerEntity).gravitychanger$setGravityDirection(id, gravityDirection, false, rotateVelocity, rotateCamera);
+        //Client
+        ((ServerPlayerEntityAccessor) playerEntity).gravitychanger$sendGravityPacket(id, gravityDirection, false, rotateVelocity, rotateCamera);
     }
 
     public static void setGravityDirectionAdvanced(ClientPlayerEntity playerEntity, Identifier id, Direction gravityDirection, PacketByteBuf verifierBuf, boolean rotateVelocity, boolean rotateCamera) {
@@ -61,8 +65,9 @@ public abstract class GravityChangerAPI {
             GravityChangerMod.LOGGER.error("Can't set server driven gravity source "+id+" from client");
             return;
         }
+        //Client
         ((RotatableEntityAccessor) playerEntity).gravitychanger$setGravityDirection(id, gravityDirection, false, rotateVelocity, rotateCamera);
-        //Send packet so that the server can verify the change
+        //Server
         ((ClientPlayerEntityAccessor) playerEntity).gravitychanger$sendGravityPacket(id, gravityDirection, verifierBuf);
     }
 
