@@ -36,6 +36,10 @@ public abstract class GravityChangerAPI {
         return ((RotatableEntityAccessor) playerEntity).gravitychanger$getGravityDirection(gravitySourceId);
     }
 
+    public static Direction getGravityDirectionAfterChange(PlayerEntity playerEntity, Identifier gravitySourceId, Direction direction) {
+        return ((RotatableEntityAccessor) playerEntity).gravitychanger$getGravityDirectionAfterChange(gravitySourceId, direction);
+    }
+
     /**
      * Sets the main gravity direction for the given player
      * If the player is a ServerPlayerEntity and gravity direction changed also syncs the direction to the clients

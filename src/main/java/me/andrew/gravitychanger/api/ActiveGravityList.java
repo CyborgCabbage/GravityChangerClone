@@ -11,6 +11,8 @@ import net.minecraft.util.math.Direction;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public class ActiveGravityList {
     private final ArrayList<ActiveGravityRecord> list = new ArrayList<>();
@@ -35,14 +37,23 @@ public class ActiveGravityList {
     }
 
     public Direction getDirection() {
-        //Remove null directions
-        list.removeIf(a -> a.direction == null);
-        //Return null if there are no active gravities
-        if (list.isEmpty()) return null;
-        //Sort into descending priority
-        list.sort(Comparator.comparingInt(r -> -GravitySource.getPriority(r.id())));
-        //Return the first element
-        return list.get(0).direction();
+        return getDirectionFromStream(list.stream());
+    }
+
+    public Direction getDirectionAfterChange(Identifier id, Direction direction) {
+        return getDirectionFromStream(list.stream().map(a -> {
+            if(a.id.equals(id)){
+                return new ActiveGravityRecord(id, direction);
+            }
+            return a;
+        }));
+    }
+
+    private static Direction getDirectionFromStream(Stream<ActiveGravityRecord> stream){
+        Optional<ActiveGravityRecord> dir = stream
+                .filter(a -> a.direction != null)
+                .max(Comparator.comparingInt(r -> GravitySource.getPriority(r.id())));
+        return dir.map(ActiveGravityRecord::direction).orElse(null);
     }
 
     private static final String ID_KEY = "Id";

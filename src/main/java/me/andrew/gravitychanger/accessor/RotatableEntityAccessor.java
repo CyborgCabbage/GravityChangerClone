@@ -6,9 +6,12 @@ import net.minecraft.util.math.Direction;
 
 public interface RotatableEntityAccessor {
     ActiveGravityList gravitychanger$getActiveGravityList();
+
     Direction gravitychanger$getGravityDirection(Identifier id);
 
     Direction gravitychanger$getGravityDirection();
+
+    Direction gravitychanger$getGravityDirectionAfterChange(Identifier id, Direction dir);
 
     void gravitychanger$setGravityDirection(Identifier id, Direction gravityDirection, boolean initialGravity, boolean rotateVelocity, boolean rotateCamera);
 

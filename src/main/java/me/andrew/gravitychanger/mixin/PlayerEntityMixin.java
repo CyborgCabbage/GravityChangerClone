@@ -72,6 +72,13 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
     }
 
     @Override
+    public Direction gravitychanger$getGravityDirectionAfterChange(Identifier id, Direction dir) {
+        Direction direction = gravitychanger$getActiveGravityList().getDirectionAfterChange(id, dir);
+        if(direction == null) return Direction.DOWN;
+        return direction;
+    }
+
+    @Override
     public void gravitychanger$onGravityChanged(Direction prevGravityDirection, boolean initialGravity, boolean rotateVelocity, boolean rotateCamera) {
         Direction gravityDirection = this.gravitychanger$getGravityDirection();
 
