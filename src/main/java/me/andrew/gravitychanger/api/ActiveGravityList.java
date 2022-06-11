@@ -10,9 +10,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Optional;
 
 public class ActiveGravityList {
     private ArrayList<ActiveGravityRecord> list = new ArrayList<>();

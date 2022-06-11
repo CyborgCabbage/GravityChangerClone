@@ -1,13 +1,10 @@
 package me.andrew.gravitychanger.mixin;
 
-import me.andrew.gravitychanger.accessor.ClientPlayerEntityAccessor;
 import me.andrew.gravitychanger.accessor.EntityAccessor;
 import me.andrew.gravitychanger.accessor.RotatableEntityAccessor;
 import me.andrew.gravitychanger.api.ActiveGravityList;
 import me.andrew.gravitychanger.util.RotationUtil;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.render.Camera;
 import net.minecraft.entity.*;
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
@@ -82,6 +79,18 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
         return direction;
     }
 
+    private CameraShift gravitychanger$cameraShift;
+
+    @Override
+    public void gravitychanger$setCameraShift(CameraShift cameraShift) {
+        gravitychanger$cameraShift = cameraShift;
+    }
+
+    @Override
+    public CameraShift gravitychanger$getCameraShift() {
+        return gravitychanger$cameraShift;
+    }
+
     @Override
     public void gravitychanger$onGravityChanged(Direction prevGravityDirection, boolean initialGravity, boolean rotateVelocity, boolean rotateCamera) {
         Direction gravityDirection = this.gravitychanger$getGravityDirection();
@@ -141,15 +150,12 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
                 this.setYaw(newViewAngles.x);
                 this.setPitch(newViewAngles.y);
             }
-            PlayerEntity player = (PlayerEntity)(Object)this;
-            if(player instanceof ClientPlayerEntity clientPlayer){
-                if(clientPlayer instanceof ClientPlayerEntityAccessor accessor){
-                    double time = player.world.getTime();
-                    Camera cam = MinecraftClient.getInstance().gameRenderer.getCamera();
-                    accessor.gravitychanger$setCameraShift(new ClientPlayerEntityAccessor.CameraShift(new ClientPlayerEntityAccessor.CameraState(
-                            new Vec3d(cam.getPos().x, cam.getPos().y, cam.getPos().z),
-                            new Quaternion(cam.getRotation())
-                    ), time, 20.0));
+
+            if(rotateCamera) {
+                if ((PlayerEntity)(Object)this instanceof ClientPlayerEntity player) {
+                    if (player instanceof RotatableEntityAccessor accessor) {
+                        accessor.gravitychanger$setCameraShift(new RotatableEntityAccessor.CameraShift(prevGravityDirection, gravityDirection, player.world.getTime(), 7.0));
+                    }
                 }
             }
         }

@@ -10,6 +10,7 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.*;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.WorldView;
@@ -40,11 +41,15 @@ public abstract class EntityRenderDispatcherMixin {
     )
     private void inject_render_0(Entity entity, double x, double y, double z, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
         Direction gravityDirection = ((EntityAccessor) entity).gravitychanger$getAppliedGravityDirection();
-        if(gravityDirection == Direction.DOWN) return;
-        if(!this.renderShadows) return;
+        //if(gravityDirection == Direction.DOWN) return;
+        //if(!this.renderShadows) return;
 
         matrices.push();
+        if(entity instanceof PlayerEntity player){
+            matrices.multiply(RotationUtil.getReverseRotation(player, tickDelta));
+        }
         matrices.multiply(RotationUtil.getCameraRotationQuaternion(gravityDirection));
+
     }
 
     @Inject(
@@ -57,8 +62,8 @@ public abstract class EntityRenderDispatcherMixin {
     )
     private void inject_render_1(Entity entity, double x, double y, double z, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
         Direction gravityDirection = ((EntityAccessor) entity).gravitychanger$getAppliedGravityDirection();
-        if(gravityDirection == Direction.DOWN) return;
-        if(!this.renderShadows) return;
+        //if(gravityDirection == Direction.DOWN) return;
+        //if(!this.renderShadows) return;
 
         matrices.pop();
     }

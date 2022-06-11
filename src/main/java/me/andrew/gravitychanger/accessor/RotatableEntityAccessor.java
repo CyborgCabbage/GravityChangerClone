@@ -16,4 +16,10 @@ public interface RotatableEntityAccessor {
     void gravitychanger$setGravityDirection(Identifier id, Direction gravityDirection, boolean initialGravity, boolean rotateVelocity, boolean rotateCamera);
 
     void gravitychanger$onGravityChanged(Direction prevGravityDirection, boolean initialGravity, boolean rotateVelocity, boolean rotateCamera);
+
+    void gravitychanger$setCameraShift(CameraShift cameraShift);
+
+    CameraShift gravitychanger$getCameraShift();
+
+    record CameraShift(Direction from, Direction to, double start, double duration){}
 }

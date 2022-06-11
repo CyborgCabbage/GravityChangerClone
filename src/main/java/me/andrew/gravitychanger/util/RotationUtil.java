@@ -1,6 +1,7 @@
 package me.andrew.gravitychanger.util;
 
-import me.andrew.gravitychanger.GravityChangerMod;
+import me.andrew.gravitychanger.accessor.RotatableEntityAccessor;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.*;
 
 import java.util.ArrayList;
@@ -219,6 +220,11 @@ public abstract class RotationUtil {
     public static Quaternion getRotationBetween(Direction start, Direction end){
         return getRotationBetween(start.getUnitVector(), end.getUnitVector());
     }
+
+    public static Quaternion getRotationBetween(Direction start, Direction end, float fraction){
+        return getRotationBetween(start.getUnitVector(), end.getUnitVector(), fraction);
+    }
+
     public static Quaternion getRotationBetween(Vec3f start, Vec3f end){
         Vec3f rotAxis = start.copy();
         rotAxis.cross(end);
@@ -226,6 +232,31 @@ public abstract class RotationUtil {
         //Make sure axis isn't {0, 0, 0}
         if(MathHelper.magnitude(rotAxis.getX(), rotAxis.getY(), rotAxis.getZ()) < 0.1 ) rotAxis = Vec3f.NEGATIVE_Z;
         return new Quaternion(rotAxis, rotAngle, false);
+    }
+
+    public static Quaternion getRotationBetween(Vec3f start, Vec3f end, float fraction){
+        Vec3f rotAxis = start.copy();
+        rotAxis.cross(end);
+        float rotAngle = (float)Math.acos(start.dot(end));
+        //Make sure axis isn't {0, 0, 0}
+        if(MathHelper.magnitude(rotAxis.getX(), rotAxis.getY(), rotAxis.getZ()) < 0.1 ) rotAxis = Vec3f.NEGATIVE_Z;
+        return new Quaternion(rotAxis, rotAngle*fraction, false);
+    }
+
+    public static Quaternion getReverseRotation(PlayerEntity player, float tickDelta){
+        RotatableEntityAccessor.CameraShift shift = ((RotatableEntityAccessor)player).gravitychanger$getCameraShift();
+        if(shift != null){
+            //Get time
+            double time = player.world.getTime();
+            time += tickDelta;
+            double currentTime = time;
+            //Get relative time
+            double relTime = (currentTime - shift.start()) / shift.duration();
+            if(relTime > 1) return new Quaternion(0,0,0,1);
+            //Get quaternion
+            return RotationUtil.getRotationBetween(shift.to(), shift.from(), 1.f-(float)relTime);
+        }
+        return new Quaternion(0,0,0,1);
     }
 
     public static boolean approximatelyEquals(Vec3f a, Vec3f b){
