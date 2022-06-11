@@ -1,5 +1,6 @@
 package me.andrew.gravitychanger.mixin.client;
 
+import me.andrew.gravitychanger.GravityChangerMod;
 import me.andrew.gravitychanger.accessor.EntityAccessor;
 import me.andrew.gravitychanger.util.RotationUtil;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -17,6 +18,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Camera.class)
 public abstract class CameraMixin {
+    private float tickDelta;
+
     @Shadow protected abstract void setPos(double x, double y, double z);
 
     @Shadow private Entity focusedEntity;
@@ -27,9 +30,13 @@ public abstract class CameraMixin {
 
     @Shadow public abstract Quaternion getRotation();
 
-    @Shadow @Final private Vec3f horizontalPlane;
-    @Shadow @Final private Vec3f verticalPlane;
-    @Shadow @Final private Vec3f diagonalPlane;
+    @Inject(
+            method = "update",
+            at = @At("HEAD")
+    )
+    private void inject_update_head(BlockView area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickDelta, CallbackInfo ci){
+        this.tickDelta = tickDelta;
+    }
 
     @Redirect(
             method = "update",
@@ -45,25 +52,11 @@ public abstract class CameraMixin {
 
         Vec3f eyeOffset = new Vec3f(RotationUtil.vecPlayerToWorld(0, y - entityLerpedY, 0, gravityDirection));
 
-        Quaternion endRot = getRotation();
         if(focusedEntity instanceof ClientPlayerEntity player){
-            //Calculate reverse axis
-            Quaternion reverseRotation = RotationUtil.getReverseRotation(player, tickDelta);
-            //Process
-            eyeOffset.rotate(reverseRotation);
-            reverseRotation.hamiltonProduct(endRot);
-            endRot = reverseRotation;
+            eyeOffset.rotate(RotationUtil.getReverseRotation(player, tickDelta));
         }
-        //Set Position
+
         setPos(eyeOffset.getX()+x, eyeOffset.getY()+entityLerpedY, eyeOffset.getZ()+z);
-        //Set Rotation
-        this.rotation.set(endRot.getX(), endRot.getY(), endRot.getZ(), endRot.getW());
-        this.horizontalPlane.set(0.0f, 0.0f, 1.0f);
-        this.horizontalPlane.rotate(this.rotation);
-        this.verticalPlane.set(0.0f, 1.0f, 0.0f);
-        this.verticalPlane.rotate(this.rotation);
-        this.diagonalPlane.set(1.0f, 0.0f, 0.0f);
-        this.diagonalPlane.rotate(this.rotation);
     }
 
     @Inject(
@@ -77,9 +70,14 @@ public abstract class CameraMixin {
     )
     private void inject_setRotation(CallbackInfo ci) {
         Direction gravityDirection = ((EntityAccessor) this.focusedEntity).gravitychanger$getAppliedGravityDirection();
-        if (gravityDirection == Direction.DOWN) return;
+        //if (gravityDirection == Direction.DOWN) return;
         Quaternion rotation = RotationUtil.getCameraRotationQuaternion(gravityDirection).copy();
         rotation.hamiltonProduct(this.rotation);
+        if(focusedEntity instanceof ClientPlayerEntity player){
+            Quaternion reverseRotation = RotationUtil.getReverseRotation(player, tickDelta);
+            reverseRotation.hamiltonProduct(rotation);
+            rotation = reverseRotation;
+        }
         this.rotation.set(rotation.getX(), rotation.getY(), rotation.getZ(), rotation.getW());
     }
 }
