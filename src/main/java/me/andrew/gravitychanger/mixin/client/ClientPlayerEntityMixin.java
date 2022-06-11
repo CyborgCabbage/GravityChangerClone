@@ -6,18 +6,17 @@ import me.andrew.gravitychanger.accessor.ClientPlayerEntityAccessor;
 import me.andrew.gravitychanger.accessor.EntityAccessor;
 import me.andrew.gravitychanger.accessor.RotatableEntityAccessor;
 import me.andrew.gravitychanger.api.ActiveGravityList;
+import me.andrew.gravitychanger.mixin.PlayerEntityMixin;
 import me.andrew.gravitychanger.util.RotationUtil;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.*;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -32,6 +31,9 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
     public ClientPlayerEntityMixin(ClientWorld world, GameProfile profile) {
         super(world, profile);
     }
+
+    private CameraShift gravitychanger$cameraShift;
+    private CameraState gravitychanger$cameraState = new CameraState(Vec3d.ZERO, Quaternion.IDENTITY);
 
     @Override
     public void gravitychanger$setGravityDirection(Identifier id, Direction gravityDirection, boolean initialGravity, boolean rotateVelocity, boolean rotateCamera) {
@@ -52,6 +54,26 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
         buf.writeBoolean(false);
         buf.writeBytes(verifierBuf);
         ClientPlayNetworking.send(GravityChangerMod.CHANNEL_GRAVITY, buf);
+    }
+
+    @Override
+    public void gravitychanger$setCameraShift(CameraShift cameraShift) {
+        gravitychanger$cameraShift = cameraShift;
+    }
+
+    @Override
+    public CameraShift gravitychanger$getCameraShift() {
+        return gravitychanger$cameraShift;
+    }
+
+    @Override
+    public void gravitychanger$setCameraState(CameraState cameraState) {
+        gravitychanger$cameraState = cameraState;
+    }
+
+    @Override
+    public CameraState gravitychanger$getCameraState() {
+        return gravitychanger$cameraState;
     }
 
     @Redirect(

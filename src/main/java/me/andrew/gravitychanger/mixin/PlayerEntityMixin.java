@@ -1,9 +1,13 @@
 package me.andrew.gravitychanger.mixin;
 
+import me.andrew.gravitychanger.accessor.ClientPlayerEntityAccessor;
 import me.andrew.gravitychanger.accessor.EntityAccessor;
 import me.andrew.gravitychanger.accessor.RotatableEntityAccessor;
 import me.andrew.gravitychanger.api.ActiveGravityList;
 import me.andrew.gravitychanger.util.RotationUtil;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.render.Camera;
 import net.minecraft.entity.*;
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
@@ -136,6 +140,17 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
                 Vec2f newViewAngles = RotationUtil.rotWorldToPlayer(worldAngles.x, worldAngles.y, gravityDirection);
                 this.setYaw(newViewAngles.x);
                 this.setPitch(newViewAngles.y);
+            }
+            PlayerEntity player = (PlayerEntity)(Object)this;
+            if(player instanceof ClientPlayerEntity clientPlayer){
+                if(clientPlayer instanceof ClientPlayerEntityAccessor accessor){
+                    double time = player.world.getTime();
+                    Camera cam = MinecraftClient.getInstance().gameRenderer.getCamera();
+                    accessor.gravitychanger$setCameraShift(new ClientPlayerEntityAccessor.CameraShift(new ClientPlayerEntityAccessor.CameraState(
+                            new Vec3d(cam.getPos().x, cam.getPos().y, cam.getPos().z),
+                            new Quaternion(cam.getRotation())
+                    ), time, 20.0));
+                }
             }
         }
     }
