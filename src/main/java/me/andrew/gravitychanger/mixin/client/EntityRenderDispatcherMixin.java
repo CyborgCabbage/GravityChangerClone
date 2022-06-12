@@ -42,7 +42,7 @@ public abstract class EntityRenderDispatcherMixin {
     private void inject_render_0(Entity entity, double x, double y, double z, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
         Direction gravityDirection = ((EntityAccessor) entity).gravitychanger$getAppliedGravityDirection();
         //if(gravityDirection == Direction.DOWN) return;
-        //if(!this.renderShadows) return;
+        if(!this.renderShadows) return;//The player has no shadows in the gui
 
         matrices.push();
         if(entity instanceof PlayerEntity player){
@@ -63,7 +63,7 @@ public abstract class EntityRenderDispatcherMixin {
     private void inject_render_1(Entity entity, double x, double y, double z, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
         Direction gravityDirection = ((EntityAccessor) entity).gravitychanger$getAppliedGravityDirection();
         //if(gravityDirection == Direction.DOWN) return;
-        //if(!this.renderShadows) return;
+        if(!this.renderShadows) return;//The player has no shadows in the gui
 
         matrices.pop();
     }
