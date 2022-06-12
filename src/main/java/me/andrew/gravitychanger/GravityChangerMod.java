@@ -100,58 +100,5 @@ public class GravityChangerMod implements ModInitializer {
         });
         GravitySource.register(DEFAULT_GRAVITY, 0);
         GravitySource.register(PLAYER_GRAVITY, 1);
-
-        /*for (Direction value : Direction.values()) {
-            LOGGER.info(value);
-            LOGGER.info("Camera: "+RotationUtil.getCameraRotationQuaternion(value));
-            LOGGER.info("World:  "+RotationUtil.getWorldRotationQuaternion(value));
-            LOGGER.info("");
-        }
-        System.exit(0);
-
-        Quaternion[] WORLD_ROTATION_QUATERNIONS = new Quaternion[6];
-        WORLD_ROTATION_QUATERNIONS[0] = Quaternion.IDENTITY.copy();
-        WORLD_ROTATION_QUATERNIONS[1] = Vec3f.POSITIVE_Z.getDegreesQuaternion(-180);
-        WORLD_ROTATION_QUATERNIONS[2] = Vec3f.POSITIVE_X.getDegreesQuaternion(-90);
-        WORLD_ROTATION_QUATERNIONS[3] = Vec3f.POSITIVE_X.getDegreesQuaternion(-90);
-        WORLD_ROTATION_QUATERNIONS[3].hamiltonProduct(Vec3f.POSITIVE_Y.getDegreesQuaternion(-180));
-        WORLD_ROTATION_QUATERNIONS[4] = Vec3f.POSITIVE_X.getDegreesQuaternion(-90);
-        WORLD_ROTATION_QUATERNIONS[4].hamiltonProduct(Vec3f.POSITIVE_Y.getDegreesQuaternion(-90));
-        WORLD_ROTATION_QUATERNIONS[5] = Vec3f.POSITIVE_X.getDegreesQuaternion(-90);
-        WORLD_ROTATION_QUATERNIONS[5].hamiltonProduct(Vec3f.POSITIVE_Y.getDegreesQuaternion(-270));
-
-        Quaternion[] ENTITY_ROTATION_QUATERNIONS = new Quaternion[6];
-        ENTITY_ROTATION_QUATERNIONS[0] = Quaternion.IDENTITY;
-        ENTITY_ROTATION_QUATERNIONS[1] = Vec3f.POSITIVE_Z.getDegreesQuaternion(-180);
-        ENTITY_ROTATION_QUATERNIONS[2] = Vec3f.POSITIVE_X.getDegreesQuaternion(90);
-        ENTITY_ROTATION_QUATERNIONS[3] = Vec3f.POSITIVE_X.getDegreesQuaternion(-90);
-        ENTITY_ROTATION_QUATERNIONS[3].hamiltonProduct(Vec3f.POSITIVE_Y.getDegreesQuaternion(-180));
-        ENTITY_ROTATION_QUATERNIONS[4] = Vec3f.POSITIVE_Y.getDegreesQuaternion(90);
-        ENTITY_ROTATION_QUATERNIONS[4].hamiltonProduct(Vec3f.POSITIVE_X.getDegreesQuaternion(90));
-        ENTITY_ROTATION_QUATERNIONS[5] = Vec3f.POSITIVE_X.getDegreesQuaternion(90);
-        ENTITY_ROTATION_QUATERNIONS[5].hamiltonProduct(Vec3f.POSITIVE_Z.getDegreesQuaternion(90));
-
-        for (Direction value : Direction.values()) {
-            Quaternion q1 = ENTITY_ROTATION_QUATERNIONS[value.getId()];
-            Quaternion q2 = RotationUtil.getCameraRotationQuaternion(value);
-            LOGGER.info(value);
-            LOGGER.info("Approximately Equal: "+equalQuaternions(q1, q2));
-            LOGGER.info("");
-        }
-        for (Direction value : Direction.values()) {
-            Quaternion q1 = WORLD_ROTATION_QUATERNIONS[value.getId()];
-            Quaternion q2 = RotationUtil.getWorldRotationQuaternion(value);
-            LOGGER.info(value);
-            LOGGER.info("Approximately Equal: "+equalQuaternions(q1, q2));
-            LOGGER.info("");
-        }
-        System.exit(0);*/
-    }
-
-    public static boolean equalQuaternions(Quaternion a, Quaternion b){
-        return MathHelper.approximatelyEquals(a.getX(), b.getX())
-                && MathHelper.approximatelyEquals(a.getY(), b.getY())
-                && MathHelper.approximatelyEquals(a.getZ(), b.getZ())
-                && MathHelper.approximatelyEquals(a.getW(), b.getW());
     }
 }
