@@ -48,6 +48,10 @@ jar {
 	from "LICENSE"
 }
 
+java {
+	withSourcesJar()
+}
+
 publishing {
 	publications {
 		mavenJava(MavenPublication) {

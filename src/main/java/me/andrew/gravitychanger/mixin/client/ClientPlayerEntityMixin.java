@@ -32,6 +32,8 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
         super(world, profile);
     }
 
+
+
     @Override
     public void gravitychanger$sendGravityPacket(Identifier id, Direction gravityDirection, PacketByteBuf verifierBuf) {
         PacketByteBuf buf = PacketByteBufs.create();

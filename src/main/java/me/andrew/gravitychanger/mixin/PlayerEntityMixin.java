@@ -4,6 +4,7 @@ import me.andrew.gravitychanger.accessor.EntityAccessor;
 import me.andrew.gravitychanger.accessor.RotatableEntityAccessor;
 import me.andrew.gravitychanger.api.ActiveGravityList;
 import me.andrew.gravitychanger.util.RotationUtil;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.*;
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
@@ -72,12 +73,22 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
     }
 
     @Override
-    public void gravitychanger$setGravityDirection(Identifier id, Direction gravityDirection, boolean initialGravity, boolean rotateVelocity, boolean rotateCamera) {
-        Direction prevGravityDirection = gravitychanger$getGravityDirection();
-        gravitychanger$getActiveGravityList().set(id, gravityDirection);
-        if(prevGravityDirection != gravitychanger$getGravityDirection()) {
-            gravitychanger$onGravityChanged(prevGravityDirection, initialGravity, rotateVelocity, rotateCamera);
-        }
+    public Direction gravitychanger$getGravityDirectionAfterChange(Identifier id, Direction dir) {
+        Direction direction = gravitychanger$getActiveGravityList().getDirectionAfterChange(id, dir);
+        if(direction == null) return Direction.DOWN;
+        return direction;
+    }
+
+    private CameraShift gravitychanger$cameraShift;
+
+    @Override
+    public void gravitychanger$setCameraShift(CameraShift cameraShift) {
+        gravitychanger$cameraShift = cameraShift;
+    }
+
+    @Override
+    public CameraShift gravitychanger$getCameraShift() {
+        return gravitychanger$cameraShift;
     }
 
     @Override
@@ -104,7 +115,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
                 serverPlayerEntity.networkHandler.syncWithPlayerPosition();
             }
             // Get gravity rotation quaternion
-            Quaternion rotation = RotationUtil.getRotationBetween(prevGravityDirection.getUnitVector(), gravityDirection.getUnitVector());
+            Quaternion rotation = RotationUtil.getRotationBetween(prevGravityDirection, gravityDirection);
             // Keep world velocity when changing gravity
             if(rotateVelocity) {
                 Vec3f worldSpaceVec = new Vec3f(RotationUtil.vecPlayerToWorld(this.getVelocity(), prevGravityDirection));
@@ -139,6 +150,14 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
                 Vec2f newViewAngles = RotationUtil.rotWorldToPlayer(worldAngles.x, worldAngles.y, gravityDirection);
                 this.setYaw(newViewAngles.x);
                 this.setPitch(newViewAngles.y);
+            }
+
+            if(rotateCamera) {
+                if ((PlayerEntity)(Object)this instanceof ClientPlayerEntity player) {
+                    if (player instanceof RotatableEntityAccessor accessor) {
+                        accessor.gravitychanger$setCameraShift(new RotatableEntityAccessor.CameraShift(prevGravityDirection, gravityDirection, player.world.getTime(), 7.0));
+                    }
+                }
             }
         }
     }

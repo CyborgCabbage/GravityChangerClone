@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 public class ActiveGravityList {
-    private final ArrayList<ActiveGravityRecord> list = new ArrayList<>();
+    private ArrayList<ActiveGravityRecord> list = new ArrayList<>();
 
     public void set(Identifier id, Direction direction){
         list.removeIf(a -> a.id.equals(id));
@@ -35,14 +35,24 @@ public class ActiveGravityList {
     }
 
     public Direction getDirection() {
-        //Remove null directions
-        list.removeIf(a -> a.direction == null);
-        //Return null if there are no active gravities
-        if (list.isEmpty()) return null;
-        //Sort into descending priority
-        list.sort(Comparator.comparingInt(r -> -GravitySource.getPriority(r.id())));
-        //Return the first element
-        return list.get(0).direction();
+        return list.stream()
+                .filter(a -> a.direction != null)
+                .max(Comparator.comparingInt(r -> GravitySource.getPriority(r.id())))
+                .map(ActiveGravityRecord::direction)
+                .orElse(null);
+    }
+
+    public Direction getDirectionAfterChange(Identifier id, Direction direction) {
+        ArrayList<ActiveGravityRecord> clone = (ArrayList<ActiveGravityRecord>) list.clone();
+        clone.removeIf(a -> a.id.equals(id));
+        if(direction != null) {
+            clone.add(new ActiveGravityRecord(id, direction));
+        }
+        return clone.stream()
+                .filter(a -> a.direction != null)
+                .max(Comparator.comparingInt(r -> GravitySource.getPriority(r.id())))
+                .map(ActiveGravityRecord::direction)
+                .orElse(null);
     }
 
     private static final String ID_KEY = "Id";
