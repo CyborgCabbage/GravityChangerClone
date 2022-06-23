@@ -2,7 +2,9 @@ package me.andrew.gravitychanger.mixin.client;
 
 import me.andrew.gravitychanger.GravityChangerMod;
 import me.andrew.gravitychanger.accessor.EntityAccessor;
+import me.andrew.gravitychanger.accessor.RotatableEntityAccessor;
 import me.andrew.gravitychanger.util.RotationUtil;
+import net.minecraft.block.AmethystBlock;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;
@@ -30,6 +32,8 @@ public abstract class CameraMixin {
 
     @Shadow public abstract Quaternion getRotation();
 
+    @Shadow protected abstract void setPos(Vec3d pos);
+
     @Inject(
             method = "update",
             at = @At("HEAD")
@@ -47,16 +51,36 @@ public abstract class CameraMixin {
             )
     )
     private void redirect_update_setPos_0(Camera camera, double x, double y, double z, BlockView area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickDelta) {
+        Vec3d startPos = temp(x, y, z, focusedEntity, tickDelta, focusedEntity.prevY);
+        Vec3d endPos = temp(x, y, z, focusedEntity, tickDelta, focusedEntity.getY());
+        setPos(startPos.lerp(endPos, tickDelta));
+    }
+
+    private Vec3d temp(double x, double y, double z, Entity focusedEntity, float tickDelta, double focusedEntityY) {
         Direction gravityDirection = ((EntityAccessor) focusedEntity).gravitychanger$getAppliedGravityDirection();
-        double entityLerpedY = MathHelper.lerp(tickDelta, focusedEntity.prevY, focusedEntity.getY());
+        Vec3f startEyeOffset = new Vec3f(RotationUtil.vecPlayerToWorld(0, y - focusedEntityY, 0, gravityDirection));
 
-        Vec3f eyeOffset = new Vec3f(RotationUtil.vecPlayerToWorld(0, y - entityLerpedY, 0, gravityDirection));
-
-        if(focusedEntity instanceof ClientPlayerEntity player){
-            eyeOffset.rotate(RotationUtil.getReverseRotation(player, tickDelta));
+        if (focusedEntity instanceof ClientPlayerEntity player) {
+            RotatableEntityAccessor.CameraShift shift = ((RotatableEntityAccessor)player).gravitychanger$getCameraShift();
+            if(shift != null) {
+                //Get time
+                double time = player.world.getTime();
+                time += tickDelta;
+                double currentTime = time;
+                //Get relative time
+                double relTime = (currentTime - shift.start()) / shift.duration();
+                if (relTime < 1) {
+                    if(shift.from().getOpposite() != shift.to()) {
+                        startEyeOffset.rotate(RotationUtil.getRotationBetween(shift.to(), shift.from(), 1.f - (float) relTime));
+                    }else{
+                        Vec3f oldPos1 = new Vec3f(0,0,0);
+                        startEyeOffset.lerp(oldPos1,1.f - (float) relTime);
+                    }
+                }
+            }
         }
 
-        setPos(eyeOffset.getX()+x, eyeOffset.getY()+entityLerpedY, eyeOffset.getZ()+z);
+        return new Vec3d(startEyeOffset.getX() + x, startEyeOffset.getY() + focusedEntityY, startEyeOffset.getZ() + z);
     }
 
     @Inject(
@@ -70,13 +94,29 @@ public abstract class CameraMixin {
     )
     private void inject_setRotation(CallbackInfo ci) {
         Direction gravityDirection = ((EntityAccessor) this.focusedEntity).gravitychanger$getAppliedGravityDirection();
-        //if (gravityDirection == Direction.DOWN) return;
         Quaternion rotation = RotationUtil.getCameraRotationQuaternion(gravityDirection).copy();
         rotation.hamiltonProduct(this.rotation);
         if(focusedEntity instanceof ClientPlayerEntity player){
-            Quaternion reverseRotation = RotationUtil.getReverseRotation(player, tickDelta);
-            reverseRotation.hamiltonProduct(rotation);
-            rotation = reverseRotation;
+            RotatableEntityAccessor.CameraShift shift = ((RotatableEntityAccessor)player).gravitychanger$getCameraShift();
+            if(shift != null) {
+                //Get time
+                double time = player.world.getTime();
+                time += tickDelta;
+                double currentTime = time;
+                //Get relative time
+                double relTime = (currentTime - shift.start()) / shift.duration();
+                if (relTime < 1) {
+                    if(shift.from().getOpposite() != shift.to()) {
+                        //Get quaternion
+                        Quaternion reverseRotation = RotationUtil.getRotationBetween(shift.to(), shift.from(), 1.f - (float) relTime);
+                        reverseRotation.hamiltonProduct(rotation);
+                        rotation = reverseRotation;
+                    }else{
+                        Quaternion reverseRotation = RotationUtil.getFlipRotation( 1.f - (float) relTime);
+                        rotation.hamiltonProduct(reverseRotation);
+                    }
+                }
+            }
         }
         this.rotation.set(rotation.getX(), rotation.getY(), rotation.getZ(), rotation.getW());
     }

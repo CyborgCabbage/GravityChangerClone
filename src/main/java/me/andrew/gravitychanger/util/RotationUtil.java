@@ -243,18 +243,26 @@ public abstract class RotationUtil {
         return new Quaternion(rotAxis, rotAngle*fraction, false);
     }
 
+    public static Quaternion getFlipRotation(float fraction){
+        Vec3f rotAxis = Vec3f.NEGATIVE_Z;
+        float rotAngle = (float)Math.PI;
+        return new Quaternion(rotAxis, rotAngle*fraction, false);
+    }
+
     public static Quaternion getReverseRotation(PlayerEntity player, float tickDelta){
         RotatableEntityAccessor.CameraShift shift = ((RotatableEntityAccessor)player).gravitychanger$getCameraShift();
         if(shift != null){
-            //Get time
-            double time = player.world.getTime();
-            time += tickDelta;
-            double currentTime = time;
-            //Get relative time
-            double relTime = (currentTime - shift.start()) / shift.duration();
-            if(relTime > 1) return new Quaternion(0,0,0,1);
-            //Get quaternion
-            return RotationUtil.getRotationBetween(shift.to(), shift.from(), 1.f-(float)relTime);
+            if(shift.from().getOpposite() != shift.to()) {
+                //Get time
+                double time = player.world.getTime();
+                time += tickDelta;
+                double currentTime = time;
+                //Get relative time
+                double relTime = (currentTime - shift.start()) / shift.duration();
+                if (relTime > 1) return new Quaternion(0, 0, 0, 1);
+                //Get quaternion
+                return RotationUtil.getRotationBetween(shift.to(), shift.from(), 1.f - (float) relTime);
+            }
         }
         return new Quaternion(0,0,0,1);
     }

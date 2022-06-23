@@ -134,6 +134,8 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
                 this.setVelocity(RotationUtil.vecWorldToPlayer(RotationUtil.vecPlayerToWorld(this.getVelocity(), prevGravityDirection), gravityDirection));
             }
             // Keep world looking direction when changing gravity
+            float deltaYaw;
+            float deltaPitch;
             if(rotateCamera) {
                 //Clamp pitch (-89.9 to 89.9), pitches closer to (-)90.0f cause accuracy issues
                 float pitch = this.getPitch();
@@ -144,28 +146,25 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
                 temp.rotate(rotation);
                 Vec2f viewRot = RotationUtil.vecToRot(RotationUtil.vecWorldToPlayer(new Vec3d(temp), gravityDirection));
                 //Update state of rotation so that the player doesn't appear to twirl round
-                float deltaYaw = viewRot.x-this.getYaw();
-                float deltaPitch = viewRot.y-this.getPitch();
-                this.setYaw(this.getYaw()+deltaYaw);
-                this.setPitch(this.getPitch()+deltaPitch);
-                this.prevYaw += deltaYaw;
-                this.prevPitch += deltaPitch;
-                this.bodyYaw += deltaYaw;
-                this.prevBodyYaw += deltaYaw;
-                this.headYaw += deltaYaw;
-                this.prevHeadYaw += deltaYaw;
+                deltaYaw = viewRot.x-this.getYaw();
+                deltaPitch = viewRot.y-this.getPitch();
             }else{
                 Vec2f worldAngles = RotationUtil.rotPlayerToWorld(this.getYaw(), this.getPitch(), prevGravityDirection);
                 Vec2f newViewAngles = RotationUtil.rotWorldToPlayer(worldAngles.x, worldAngles.y, gravityDirection);
-                this.setYaw(newViewAngles.x);
-                this.setPitch(newViewAngles.y);
+                deltaYaw = newViewAngles.x-this.getYaw();
+                deltaPitch = newViewAngles.y-this.getPitch();
             }
-
-            if(rotateCamera) {
-                if ((PlayerEntity)(Object)this instanceof ClientPlayerEntity player) {
-                    if (player instanceof RotatableEntityAccessor accessor) {
-                        accessor.gravitychanger$setCameraShift(new RotatableEntityAccessor.CameraShift(prevGravityDirection, gravityDirection, player.world.getTime(), 7.0));
-                    }
+            this.setYaw(this.getYaw()+deltaYaw);
+            this.setPitch(this.getPitch()+deltaPitch);
+            this.prevYaw += deltaYaw;
+            this.prevPitch += deltaPitch;
+            this.bodyYaw += deltaYaw;
+            this.prevBodyYaw += deltaYaw;
+            this.headYaw += deltaYaw;
+            this.prevHeadYaw += deltaYaw;
+            if ((PlayerEntity)(Object)this instanceof ClientPlayerEntity player) {
+                if (player instanceof RotatableEntityAccessor accessor) {
+                    accessor.gravitychanger$setCameraShift(new RotatableEntityAccessor.CameraShift(prevGravityDirection, gravityDirection, player.world.getTime(), 7.0));
                 }
             }
         }
