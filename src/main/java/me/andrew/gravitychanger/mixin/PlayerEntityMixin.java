@@ -125,6 +125,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
             }
             // Get gravity rotation quaternion
             Quaternion rotation = RotationUtil.getRotationBetween(prevGravityDirection, gravityDirection);
+            boolean opposite = prevGravityDirection.getOpposite() == gravityDirection;
             // Keep world velocity when changing gravity
             if(rotateVelocity) {
                 Vec3f worldSpaceVec = new Vec3f(RotationUtil.vecPlayerToWorld(this.getVelocity(), prevGravityDirection));
@@ -136,7 +137,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
             // Keep world looking direction when changing gravity
             float deltaYaw;
             float deltaPitch;
-            if(rotateCamera) {
+            if(rotateCamera && !opposite) {
                 //Clamp pitch (-89.9 to 89.9), pitches closer to (-)90.0f cause accuracy issues
                 float pitch = this.getPitch();
                 pitch = Math.min(pitch, 89.9f);
@@ -162,9 +163,11 @@ public abstract class PlayerEntityMixin extends LivingEntity implements EntityAc
             this.prevBodyYaw += deltaYaw;
             this.headYaw += deltaYaw;
             this.prevHeadYaw += deltaYaw;
-            if ((PlayerEntity)(Object)this instanceof ClientPlayerEntity player) {
-                if (player instanceof RotatableEntityAccessor accessor) {
-                    accessor.gravitychanger$setCameraShift(new RotatableEntityAccessor.CameraShift(prevGravityDirection, gravityDirection, player.world.getTime(), 7.0));
+            if(rotateCamera) {
+                if ((PlayerEntity) (Object) this instanceof ClientPlayerEntity player) {
+                    if (player instanceof RotatableEntityAccessor accessor) {
+                        accessor.gravitychanger$setCameraShift(new RotatableEntityAccessor.CameraShift(prevGravityDirection, gravityDirection, player.world.getTime(), 7.0));
+                    }
                 }
             }
         }
